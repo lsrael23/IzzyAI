@@ -58,6 +58,7 @@ app.post("/chat", async (req, res) => {
   }
 
   const message = req.body?.message;
+  const conversationId = req.body?.conversationId;
 
   if (typeof message !== "string" || !message.trim()) {
     return res.status(400).json({
