@@ -143,7 +143,8 @@ input[type=range]{width:100%;accent-color:var(--cyan)}.row{display:flex;align-it
  function send() {
    const raw = $("messageInput").value.trim(); if (!raw) return;
    addMessage(raw, "user"); $("messageInput").value = "";
-   const reply = demoReply(raw); setTimeout(() => { addMessage(reply, "ai"); speak(reply); }, 180);
+   fetch("https://izzyai.onrender.com/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:raw})}).then(async r=>{const d=await r.json().catch(()=>({}));const reply=d.reply||d.error||"Erreur du serveur.";addMessage(reply,"ai");if(r.ok)speak(reply);}).catch(()=>addMessage("Je n’arrive pas à joindre mon serveur. Réessaie dans un instant.","ai"));return;
+const reply = demoReply(raw); setTimeout(() => { addMessage(reply, "ai"); speak(reply); }, 180);
  }
  $("sendBtn").addEventListener("click", send);
  $("messageInput").addEventListener("keydown", e => { if (e.key==="Enter" && !e.shiftKey) { e.preventDefault(); send(); }});
