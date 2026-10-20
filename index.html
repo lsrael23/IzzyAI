@@ -140,12 +140,41 @@ input[type=range]{width:100%;accent-color:var(--cyan)}.row{display:flex;align-it
    };
    return prefix + (endings[prefs.tone] || endings.casual);
  }
- function send() {
-   const raw = $("messageInput").value.trim(); if (!raw) return;
-   addMessage(raw, "user"); $("messageInput").value = "";
-   fetch("https://izzyai.onrender.com/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:raw})}).then(async r=>{const d=await r.json().catch(()=>({}));const reply=d.reply||d.error||"Erreur du serveur.";addMessage(reply,"ai");if(r.ok)speak(reply);}).catch(()=>addMessage("Je n’arrive pas à joindre mon serveur. Réessaie dans un instant.","ai"));return;
-const reply = demoReply(raw); setTimeout(() => { addMessage(reply, "ai"); speak(reply); }, 180);
- }
+ 
+async function send() {
+  const raw = $("messageInput").value.trim();
+  if (!raw) return;
+
+  addMessage(raw, "user");
+  $("messageInput").value = "";
+
+  try {
+    const response = await fetch("https://izzyai.onrender.com/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: raw
+      })
+    });
+
+    const data = await response.json();
+    const reply = data.reply || data.error || "Erreur du serveur.";
+
+    addMessage(reply, "ai");
+
+    if (response.ok) {
+      speak(reply);
+    }
+  } catch (error) {
+    addMessage(
+      "Je n'arrive pas à joindre mon serveur. Réessaie dans un instant.",
+      "ai"
+    );
+  }
+}
+
  $("sendBtn").addEventListener("click", send);
  $("messageInput").addEventListener("keydown", e => { if (e.key==="Enter" && !e.shiftKey) { e.preventDefault(); send(); }});
  $("voiceBtn").addEventListener("click", () => { voiceOn = !voiceOn; $("voiceBtn").textContent = voiceOn ? "🔊 Voix : activée" : "🔇 Voix : coupée"; if(!voiceOn && "speechSynthesis" in window) speechSynthesis.cancel(); });
