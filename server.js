@@ -34,6 +34,7 @@ app.use((req, res, next) => {
 });
 
 const requests = new Map();
+const conversations = new Map();
 
 app.get("/", (req, res) => {
   res.send("IZZY AI server is running!");
