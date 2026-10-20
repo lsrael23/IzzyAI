@@ -168,7 +168,10 @@ async function send() {
 
   addMessage(raw, "user");
   $("messageInput").value = "";
+const conversationId =
+  localStorage.getItem("izzyConversationId") || crypto.randomUUID();
 
+localStorage.setItem("izzyConversationId", conversationId);
   try {
     const response = await fetch("https://izzyai.onrender.com/chat", {
       method: "POST",
@@ -176,8 +179,9 @@ async function send() {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        message: raw
-      })
+  message: raw,
+  conversationId: conversationId
+})
     });
 
     const data = await response.json();
