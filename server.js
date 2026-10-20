@@ -70,29 +70,60 @@ app.post("/chat", async (req, res) => {
     });
   }
 
-  if (!process.env.OPENAI_API_KEY) {
+  if (!process.env.GROQ_API_KEY) {
     return res.status(503).json({
-      error: "La clé IA n'est pas configurée."
+      error: "La clé API Groq n'est pas configurée sur Render."
     });
   }
 
   try {
     const client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
+      apiKey: process.env.GROQ_API_KEY,
+      baseURL: "https://api.groq.com/openai/v1"
     });
 
-    const response = await client.responses.create({
-      model: "gpt-4.1-mini",
-      instructions:
-        "Tu es IZZY AI, un assistant amical, naturel, utile et honnête. Réponds dans la langue de l'utilisateur.",
-      input: message.trim()
+    const response = await client.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "system",
+          content:
+            "Tu es IZZY AI, un assistant amical, naturel, utile et honnête. Réponds dans la langue de l'utilisateur."
+        },
+        {
+          role: "user",
+          content: message.trim()
+        }
+      ],
+      max_tokens: 800
     });
 
-    res.json({ reply: response.output_text });
+    const reply = response.choices?.[0]?.message?.content;
+
+    if (!reply) {
+      return res.status(502).json({
+        error: "IZZY AI n'a pas reçu de réponse valide."
+      });
+    }
+
+    return res.json({ reply });
   } catch (error) {
-    console.error("Erreur IA:", error.message);
-    res.status(500).json({
-      error: "IZZY AI rencontre un problème. Réessaie plus tard."
+    console.error("Erreur Groq:", error.status || "", error.message);
+
+    if (error.status === 401) {
+      return res.status(502).json({
+        error: "La clé API Groq est invalide. Vérifie GROQ_API_KEY sur Render."
+      });
+    }
+
+    if (error.status === 429) {
+      return res.status(429).json({
+        error: "La limite Groq est atteinte. Réessaie plus tard."
+      });
+    }
+
+    return res.status(502).json({
+      error: "IZZY AI rencontre un problème avec le service IA. Réessaie plus tard."
     });
   }
 });
