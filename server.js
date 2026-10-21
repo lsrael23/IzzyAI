@@ -81,7 +81,32 @@ app.post("/chat", async (req, res) => {
     });
 
     const history = conversations.get(conversationId) || [];
+    let searchContext = "";
 
+    if (
+      /recherche|sur internet|sur le web|actualit[eé]s|aujourd'hui|aujourd’hui|dernier|dernière|récent|récente|météo|prix actuel|qui est actuellement/i.test(message)
+    ) {
+      try {
+        const searchResponse = await fetch("https://api.tavily.com/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            api_key: process.env.TAVILY_API_KEY,
+            query: message,
+            search_depth: "basic",
+            max_results: 5,
+            include_answer: true
+          })
+        });
+
+        if (searchResponse.ok) {
+          const searchData = await searchResponse.json();
+          searchContext = JSON.stringify(searchData);
+        }
+      } catch (error) {
+        console.error("Erreur recherche Web:", error.message);
+      }
+    }
     const response = await client.chat.completions.create({
       model: "openai/gpt-oss-120b",
       messages: [
