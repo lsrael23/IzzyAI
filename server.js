@@ -120,6 +120,20 @@ messages: [
       });
     }
 
+if (
+  typeof conversationId === "string" &&
+  conversationId.length <= 100
+) {
+  const history = conversations.get(conversationId) || [];
+
+  history.push(
+    { role: "user", content: message.trim() },
+    { role: "assistant", content: reply }
+  );
+
+  conversations.set(conversationId, history.slice(-20));
+}
+
     return res.json({ reply });
   } catch (error) {
     console.error("Erreur Groq:", error.status || "", error.message);
