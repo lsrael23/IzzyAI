@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="fr">
 <head>
@@ -7,7 +8,6 @@
 <link rel="icon" href="https://raw.githubusercontent.com/lsrael23/IzzyAI/main/05DA307C-CFC0-4BBE-A61C-1560A7C4F3FA.png">
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/lsrael23/IzzyAI/main/05DA307C-CFC0-4BBE-A61C-1560A7C4F3FA.png">
 <title>IZZY AI — Compagnon</title>
-
 <style>
 :root{
   color-scheme:dark;
@@ -17,445 +17,171 @@
   --line:#393126;
   --text:#f7f5ef;
   --muted:#aaa49a;
-  --cyan:#d7b45a;
-  --violet:#d7b45a;
-  --good:#a8d5a2;
-  --bad:#ff9292;
   --gold:#d7b45a;
   --gold-light:#f5df9b;
-  --gold-dark:#806321;
+  --good:#a8d5a2;
+  --bad:#ff9292;
 }
-
 *{box-sizing:border-box}
-
 body{
   margin:0;
-  background:
-    radial-gradient(ellipse at 50% -15%,#332918 0%,#15130f 24%,var(--bg) 64%);
+  background:radial-gradient(ellipse at 50% -15%,#332918 0%,#15130f 24%,var(--bg) 64%);
   font-family:Inter,system-ui,-apple-system,sans-serif;
   color:var(--text);
   min-height:100vh;
 }
-
 button,input,textarea,select{font:inherit}
-
 button{
-  cursor:pointer;
-  color:inherit;
-  border:1px solid var(--line);
-  background:var(--panel2);
-  border-radius:14px;
-  padding:11px 14px;
+  cursor:pointer;color:inherit;border:1px solid var(--line);
+  background:var(--panel2);border-radius:14px;padding:11px 14px;
   transition:border-color .2s,background .2s,transform .2s;
 }
-
-button:hover{
-  border-color:var(--gold);
+button:hover{border-color:var(--gold)}
+button:active{transform:scale(.98)}
+button:disabled{opacity:.55;cursor:wait}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
+  outline:2px solid var(--gold);outline-offset:2px;
 }
-
-button:active{
-  transform:scale(.98);
-}
-
-button:disabled{
-  opacity:.55;
-  cursor:wait;
-}
-
-button:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible{
-  outline:2px solid var(--gold);
-  outline-offset:2px;
-}
-
 .app{
-  max-width:760px;
-  margin:0 auto;
+  max-width:760px;margin:0 auto;
   padding:env(safe-area-inset-top) 16px calc(24px + env(safe-area-inset-bottom));
 }
-
 header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:20px 2px 16px;
-  gap:12px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 2px 16px;gap:12px;
 }
-
-.brand{
-  display:flex;
-  gap:11px;
-  align-items:center;
-  min-width:0;
-}
-
+.brand{display:flex;gap:11px;align-items:center;min-width:0}
 .logo{
-  width:42px;
-  height:42px;
-  border-radius:14px;
-  object-fit:contain;
-  background:#090909;
-  box-shadow:0 0 18px #d7b45a25;
+  width:42px;height:42px;border-radius:14px;object-fit:contain;
+  background:#090909;box-shadow:0 0 18px #d7b45a25;
 }
-
-.brand h1{
-  font-size:17px;
-  letter-spacing:.13em;
-  margin:0;
-}
-
-.brand p{
-  margin:3px 0 0;
-  color:var(--muted);
-  font-size:12px;
-}
-
+.brand h1{font-size:17px;letter-spacing:.13em;margin:0}
+.brand p{margin:3px 0 0;color:var(--muted);font-size:12px}
 .status{
-  font-size:11px;
-  color:var(--muted);
-  border:1px solid var(--line);
-  background:#111214;
-  padding:7px 9px;
-  border-radius:999px;
-  white-space:nowrap;
+  font-size:11px;color:var(--muted);border:1px solid var(--line);
+  background:#111214;padding:7px 9px;border-radius:999px;white-space:nowrap;
 }
-
-.status.good{
-  color:var(--good);
-  border-color:#a8d5a245;
-}
-
-.status.bad{
-  color:var(--bad);
-  border-color:#ff929245;
-}
-
-.hero{
-  text-align:center;
-  padding:18px 8px 20px;
-}
-
+.status.good{color:var(--good);border-color:#a8d5a245}
+.status.bad{color:var(--bad);border-color:#ff929245}
+.hero{text-align:center;padding:18px 8px 20px}
 .orb{
-  margin:0 auto 17px;
-  width:142px;
-  height:142px;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  position:relative;
-  background:
-    radial-gradient(circle at 35% 28%,#fff1bb 0%,#d7b45a 12%,#92702e 38%,#302515 68%,#0a0a0a 82%);
-  box-shadow:
-    0 0 34px #d7b45a24,
-    0 0 75px #d7b45a0d,
-    inset -12px -15px 28px #080808;
-  animation:float 5s ease-in-out infinite;
-  overflow:hidden;
+  margin:0 auto 17px;width:142px;height:142px;border-radius:50%;
+  display:grid;place-items:center;position:relative;
+  background:radial-gradient(circle at 35% 28%,#fff1bb 0%,#d7b45a 12%,#92702e 38%,#302515 68%,#0a0a0a 82%);
+  box-shadow:0 0 34px #d7b45a24,0 0 75px #d7b45a0d,inset -12px -15px 28px #080808;
+  animation:float 5s ease-in-out infinite;overflow:hidden;
 }
-
 .orb:before{
-  content:"";
-  position:absolute;
-  inset:-5px;
-  border-radius:50%;
-  border:1px solid #d7b45a65;
-  pointer-events:none;
+  content:"";position:absolute;inset:-5px;border-radius:50%;
+  border:1px solid #d7b45a65;pointer-events:none;
 }
-
 .orb img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  border-radius:50%;
-  position:relative;
-  z-index:1;
+  width:100%;height:100%;object-fit:contain;border-radius:50%;
+  position:relative;z-index:1;
 }
-
-@keyframes float{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-5px)}
-}
-
-.hero h2{
-  font-size:27px;
-  margin:0 0 7px;
-  letter-spacing:-.04em;
-}
-
-.hero p{
-  margin:0 auto;
-  color:var(--muted);
-  font-size:14px;
-  max-width:430px;
-  line-height:1.5;
-}
-
-.pills{
-  display:flex;
-  gap:7px;
-  justify-content:center;
-  flex-wrap:wrap;
-  margin-top:15px;
-}
-
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.hero h2{font-size:27px;margin:0 0 7px;letter-spacing:-.04em}
+.hero p{margin:0 auto;color:var(--muted);font-size:14px;max-width:430px;line-height:1.5}
+.pills{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:15px}
 .pill{
-  font-size:11px;
-  color:#e2d3a9;
-  border:1px solid #4b3c20;
-  border-radius:999px;
-  padding:6px 9px;
-  background:#17130d;
+  font-size:11px;color:#e2d3a9;border:1px solid #4b3c20;
+  border-radius:999px;padding:6px 9px;background:#17130d;
 }
-
 .card{
   background:linear-gradient(160deg,#171716f2,#0f1010f5);
-  border:1px solid var(--line);
-  border-radius:20px;
-  padding:16px;
-  margin:12px 0;
-  box-shadow:0 10px 40px #0005;
+  border:1px solid var(--line);border-radius:20px;padding:16px;
+  margin:12px 0;box-shadow:0 10px 40px #0005;
 }
-
 .card-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  margin-bottom:12px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;margin-bottom:12px;
 }
-
-.card h3{
-  font-size:14px;
-  margin:0;
-  letter-spacing:.06em;
-  color:var(--gold-light);
-}
-
-.sub{
-  font-size:12px;
-  color:var(--muted);
-}
-
+.card h3{font-size:14px;margin:0;letter-spacing:.06em;color:var(--gold-light)}
+.sub{font-size:12px;color:var(--muted)}
 .messages{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  max-height:330px;
-  overflow:auto;
-  padding:2px 1px 10px;
-  scroll-behavior:smooth;
+  display:flex;flex-direction:column;gap:10px;max-height:330px;
+  overflow:auto;padding:2px 1px 10px;scroll-behavior:smooth;
 }
-
 .msg{
-  max-width:88%;
-  padding:11px 13px;
-  border-radius:15px;
-  font-size:14px;
-  line-height:1.5;
-  white-space:pre-wrap;
-  overflow-wrap:anywhere;
+  max-width:88%;padding:11px 13px;border-radius:15px;
+  font-size:14px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;
 }
-
 .msg.ai{
-  align-self:flex-start;
-  background:#191918;
-  border:1px solid #37342d;
+  align-self:flex-start;background:#191918;border:1px solid #37342d;
   border-bottom-left-radius:5px;
 }
-
 .msg.user{
-  align-self:flex-end;
-  background:linear-gradient(135deg,#d7b45a,#94712d);
-  color:#11100c;
-  border:1px solid #f1d78d;
-  border-bottom-right-radius:5px;
+  align-self:flex-end;background:linear-gradient(135deg,#d7b45a,#94712d);
+  color:#11100c;border:1px solid #f1d78d;border-bottom-right-radius:5px;
 }
-
-.compose{
-  display:flex;
-  gap:8px;
-  align-items:flex-end;
-}
-
+.compose{display:flex;gap:8px;align-items:flex-end}
 .compose textarea{
-  resize:vertical;
-  min-height:45px;
-  max-height:120px;
-  flex:1;
-  background:#090a0a;
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:12px;
-  color:var(--text);
-  min-width:0;
+  resize:vertical;min-height:45px;max-height:120px;flex:1;
+  background:#090a0a;border:1px solid var(--line);border-radius:14px;
+  padding:12px;color:var(--text);min-width:0;
 }
-
 .send{
   background:linear-gradient(135deg,#f0d889,#b58a32);
-  border:1px solid #e5c36d;
-  color:#14110a;
-  font-weight:800;
-  min-width:48px;
+  border:1px solid #e5c36d;color:#14110a;font-weight:800;min-width:48px;
 }
-
-.tools{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  margin-top:10px;
+.tools,.photo-tools{
+  display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;
 }
-
-.tools button{
-  font-size:12px;
-  padding:9px 11px;
+.tools button{font-size:12px;padding:9px 11px}
+.primary{background:#211d14;border-color:#705a2b}
+.primary:hover{background:#302717;border-color:var(--gold)}
+.photo-tools button{
+  flex:1;min-width:130px;border-color:#705a2b;
+  background:#211d14;color:var(--gold-light);
 }
-
-.primary{
-  background:#211d14;
-  border-color:#705a2b;
+.photo-preview{
+  display:none;margin-top:12px;padding:10px;
+  border:1px solid #705a2b;border-radius:14px;background:#0b0c0b;
 }
-
-.primary:hover{
-  background:#302717;
-  border-color:var(--gold);
+.photo-preview.visible{display:block}
+.photo-preview img{
+  display:block;width:100%;max-height:280px;object-fit:contain;border-radius:10px;
 }
-
-label{
-  font-size:12px;
-  color:#e0d5bb;
-  display:block;
-  margin-bottom:7px;
+.photo-preview .photo-remove{margin-top:9px;width:100%}
+label{font-size:12px;color:#e0d5bb;display:block;margin-bottom:7px}
+.field{margin:13px 0}
+.field input[type=text],.field textarea,.field select{
+  width:100%;background:#090a0a;border:1px solid var(--line);
+  border-radius:12px;padding:11px;color:var(--text);
 }
-
-.field{
-  margin:13px 0;
-}
-
-.field input[type=text],
-.field textarea,
-.field select{
-  width:100%;
-  background:#090a0a;
-  border:1px solid var(--line);
-  border-radius:12px;
-  padding:11px;
-  color:var(--text);
-}
-
-.field select option{
-  background:#111214;
-  color:var(--text);
-}
-
-input[type=range]{
-  width:100%;
-  accent-color:var(--gold);
-}
-
-.row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-}
-
+.field select option{background:#111214;color:var(--text)}
+input[type=range]{width:100%;accent-color:var(--gold)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .toggleline{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:11px 0;
-  border-bottom:1px solid #302d25;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:11px 0;border-bottom:1px solid #302d25;
 }
-
-.toggleline:last-child{
-  border-bottom:0;
-}
-
-.toggleline strong{
-  font-size:13px;
-  font-weight:600;
-}
-
-.toggleline small{
-  display:block;
-  color:var(--muted);
-  font-size:11px;
-  margin-top:3px;
-}
-
-.toggleline input{
-  accent-color:var(--gold);
-  width:18px;
-  height:18px;
-}
-
-.memory-list{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-
+.toggleline:last-child{border-bottom:0}
+.toggleline strong{font-size:13px;font-weight:600}
+.toggleline small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+.toggleline input{accent-color:var(--gold);width:18px;height:18px}
+.memory-list{display:flex;flex-direction:column;gap:8px}
 .memory{
-  display:flex;
-  align-items:flex-start;
-  gap:8px;
-  border:1px solid var(--line);
-  background:#0b0c0b;
-  border-radius:12px;
-  padding:10px;
+  display:flex;align-items:flex-start;gap:8px;border:1px solid var(--line);
+  background:#0b0c0b;border-radius:12px;padding:10px;
 }
-
-.memory span{
-  font-size:13px;
-  line-height:1.4;
-  flex:1;
-  overflow-wrap:anywhere;
-}
-
-.memory button{
-  padding:5px 8px;
-  font-size:11px;
-  border-radius:9px;
-}
-
-.note{
-  font-size:12px;
-  color:var(--muted);
-  line-height:1.55;
-}
-
-.footer{
-  text-align:center;
-  color:#817967;
-  font-size:11px;
-  padding:12px 0 4px;
-}
-
-#energyValue{
-  color:var(--gold-light);
-}
-
-#memoryInput{
-  color:var(--text);
-}
-
+.memory span{font-size:13px;line-height:1.4;flex:1;overflow-wrap:anywhere}
+.memory button{padding:5px 8px;font-size:11px;border-radius:9px}
+.note{font-size:12px;color:var(--muted);line-height:1.55}
+.footer{text-align:center;color:#817967;font-size:11px;padding:12px 0 4px}
+#energyValue{color:var(--gold-light)}
+#memoryInput{color:var(--text)}
 @media(min-width:620px){
   .hero{padding-top:28px}
   .orb{width:158px;height:158px}
   .hero h2{font-size:31px}
   .app{padding-left:22px;padding-right:22px}
 }
-
 @media(prefers-reduced-motion:reduce){
-  .orb{animation:none}
-  button{transition:none}
+  .orb{animation:none}button{transition:none}
 }
 </style>
 </head>
-
 <body>
 <div class="app">
 <header>
@@ -475,26 +201,48 @@ input[type=range]{
   <div class="pills">
     <span class="pill">Assistant IA</span>
     <span class="pill">Mémoire locale</span>
-    <span class="pill">Commandes vocales selon le navigateur</span>
+    <span class="pill">Commandes vocales</span>
+    <span class="pill">Analyse de photos</span>
   </div>
 </section>
 
 <section class="card">
-  <div class="card-head"><h3>CONVERSATION</h3><span class="sub" id="conversationLabel">Connexion au serveur…</span></div>
+  <div class="card-head">
+    <h3>CONVERSATION</h3>
+    <span class="sub" id="conversationLabel">Connexion au serveur…</span>
+  </div>
+
   <div class="messages" id="messages" aria-live="polite">
     <div class="msg ai">Wesh ! Moi, c’est IZZY AI. Envoie-moi ton premier message !</div>
   </div>
+
   <div class="compose">
     <textarea id="messageInput" rows="1" maxlength="4000" placeholder="Écris-moi quelque chose…" aria-label="Ton message"></textarea>
     <button class="send" id="sendBtn" aria-label="Envoyer">➤</button>
   </div>
+
   <div class="tools">
     <button class="primary" id="micBtn">🎙️ Parler</button>
     <button id="voiceBtn">🔊 Voix : activée</button>
     <button id="stopBtn">■ Stop voix</button>
     <button id="clearChatBtn">Effacer le chat</button>
   </div>
-  <p class="note" id="voiceNote">La lecture vocale dépend des capacités du navigateur. Si le micro ne fonctionne pas, écris ton message.</p>
+
+  <div class="photo-tools">
+    <button type="button" id="cameraBtn">📸 Prendre une photo</button>
+    <button type="button" id="galleryBtn">🖼️ Choisir une image</button>
+  </div>
+
+  <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden>
+  <input type="file" id="galleryInput" accept="image/*" hidden>
+
+  <div class="photo-preview" id="photoPreview">
+    <img id="photoPreviewImage" alt="Aperçu de la photo sélectionnée">
+    <p class="note">Vérifie ta photo avant de l’envoyer à IZZY AI.</p>
+    <button type="button" class="photo-remove" id="removePhotoBtn">✕ Retirer la photo</button>
+  </div>
+
+  <p class="note" id="voiceNote">La lecture vocale dépend du navigateur. Les photos sont envoyées au serveur pour être analysées. Évite les images privées ou sensibles.</p>
 </section>
 
 <section class="card">
@@ -512,14 +260,20 @@ input[type=range]{
     <div class="row"><label for="energy">Énergie</label><span class="sub" id="energyValue">70 %</span></div>
     <input id="energy" type="range" min="0" max="100" value="70">
   </div>
-  <div class="field"><label for="nickname">Comment t’appeler ?</label><input id="nickname" type="text" maxlength="32" placeholder="Ex. mek, frérot…"></div>
-  <div class="toggleline"><div><strong>Répondre à voix haute</strong><small>Lire les réponses avec la voix du navigateur</small></div><input id="speakReplies" type="checkbox" checked></div>
+  <div class="field">
+    <label for="nickname">Comment t’appeler ?</label>
+    <input id="nickname" type="text" maxlength="32" placeholder="Ex. mek, frérot…">
+  </div>
+  <div class="toggleline">
+    <div><strong>Répondre à voix haute</strong><small>Lire les réponses avec la voix du navigateur</small></div>
+    <input id="speakReplies" type="checkbox" checked>
+  </div>
   <button id="savePersonality" class="primary" style="width:100%;margin-top:13px">Enregistrer les réglages</button>
 </section>
 
 <section class="card">
   <div class="card-head"><h3>MA MÉMOIRE</h3><span class="sub">Stockage local</span></div>
-  <p class="note">Tes souvenirs restent enregistrés sur cet appareil. Ils sont transmis au serveur avec tes messages afin qu’IZZY AI puisse les utiliser pour personnaliser ses réponses. Évite les informations sensibles.</p>
+  <p class="note">Tes souvenirs restent enregistrés sur cet appareil. Ils peuvent être transmis au serveur avec tes messages. Évite les informations sensibles.</p>
   <div class="field">
     <label for="memoryInput">Ajouter un souvenir</label>
     <div class="compose">
@@ -528,7 +282,10 @@ input[type=range]{
     </div>
   </div>
   <div id="memoryList" class="memory-list"><p class="sub">Aucun souvenir enregistré.</p></div>
-  <div class="tools"><button id="exportMemory">Exporter les souvenirs</button><button id="deleteMemory">Tout effacer</button></div>
+  <div class="tools">
+    <button id="exportMemory">Exporter les souvenirs</button>
+    <button id="deleteMemory">Tout effacer</button>
+  </div>
 </section>
 
 <div class="footer">IZZY AI • Assistant connecté à un serveur distant</div>
@@ -545,53 +302,44 @@ const STORE = {prefs:"izzyAI.prefs.v1",memories:"izzyAI.memories.v1"};
 let voiceOn = true;
 let sending = false;
 let serverOnline = false;
+let selectedImageData = null;
 
 function readStore(key,fallback){
-  try {
+  try{
     const value = localStorage.getItem(key);
     return value === null ? fallback : JSON.parse(value);
-  } catch {
-    return fallback;
-  }
+  }catch{return fallback;}
 }
 
 function writeStore(key,value){
-  try {
+  try{
     localStorage.setItem(key,JSON.stringify(value));
     return true;
-  } catch {
-    return false;
-  }
+  }catch{return false;}
 }
 
 function getConversationId(){
-  try {
+  try{
     let id = localStorage.getItem("izzyConversationId");
-    if (!id) {
+    if(!id){
       id = window.crypto && typeof window.crypto.randomUUID === "function"
         ? window.crypto.randomUUID()
         : "izzy-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
       localStorage.setItem("izzyConversationId",id);
     }
     return id;
-  } catch {
-    return "izzy-" + Date.now().toString(36);
-  }
+  }catch{return "izzy-" + Date.now().toString(36);}
 }
 
 let prefs = readStore(STORE.prefs,{
-  tone:"casual",
-  energy:70,
-  nickname:"",
-  speakReplies:true
+  tone:"casual",energy:70,nickname:"",speakReplies:true
 });
 
 let memories = readStore(STORE.memories,[]);
-if (!Array.isArray(memories)) memories = [];
+if(!Array.isArray(memories)) memories = [];
 memories = memories.filter(item => typeof item === "string").slice(0,50);
 
-$("tone").value = ["casual","calm","funny","direct"].includes(prefs.tone)
-  ? prefs.tone : "casual";
+$("tone").value = ["casual","calm","funny","direct"].includes(prefs.tone) ? prefs.tone : "casual";
 $("energy").value = Math.max(0,Math.min(100,Number(prefs.energy ?? 70)));
 $("energyValue").textContent = $("energy").value + " %";
 $("nickname").value = typeof prefs.nickname === "string" ? prefs.nickname : "";
@@ -612,7 +360,7 @@ function addMessage(text,who){
 }
 
 function speak(text){
-  if (!voiceOn || !$("speakReplies").checked || !("speechSynthesis" in window)) return;
+  if(!voiceOn || !$("speakReplies").checked || !("speechSynthesis" in window)) return;
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = "fr-FR";
@@ -630,26 +378,96 @@ function getCurrentPreferences(){
   };
 }
 
+// PHOTOS : sélection, aperçu et réduction de la taille
+function clearSelectedPhoto(){
+  selectedImageData = null;
+  $("photoPreviewImage").removeAttribute("src");
+  $("photoPreview").classList.remove("visible");
+  $("cameraInput").value = "";
+  $("galleryInput").value = "";
+  $("messageInput").placeholder = "Écris-moi quelque chose…";
+}
+
+function preparePhoto(file){
+  if(!file) return;
+
+  if(!file.type.startsWith("image/")){
+    alert("Choisis un fichier image valide.");
+    return;
+  }
+
+  if(file.size > 15 * 1024 * 1024){
+    alert("Cette image est trop volumineuse. Choisis une photo de moins de 15 Mo.");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    const image = new Image();
+
+    image.onload = () => {
+      const maxDimension = 1280;
+      const scale = Math.min(1,maxDimension / Math.max(image.width,image.height));
+      const canvas = document.createElement("canvas");
+
+      canvas.width = Math.max(1,Math.round(image.width * scale));
+      canvas.height = Math.max(1,Math.round(image.height * scale));
+
+      const context = canvas.getContext("2d");
+      if(!context){
+        alert("Impossible de préparer cette image.");
+        return;
+      }
+
+      context.drawImage(image,0,0,canvas.width,canvas.height);
+      selectedImageData = canvas.toDataURL("image/jpeg",0.78);
+
+      $("photoPreviewImage").src = selectedImageData;
+      $("photoPreview").classList.add("visible");
+      $("messageInput").placeholder = "Pose une question sur ta photo…";
+      $("messageInput").focus();
+    };
+
+    image.onerror = () => alert("Impossible de lire cette image.");
+    image.src = reader.result;
+  };
+
+  reader.onerror = () => alert("Impossible d'ouvrir cette image.");
+  reader.readAsDataURL(file);
+}
+
+$("cameraBtn").addEventListener("click",() => $("cameraInput").click());
+$("galleryBtn").addEventListener("click",() => $("galleryInput").click());
+
+$("cameraInput").addEventListener("change",event => {
+  preparePhoto(event.target.files?.[0]);
+});
+$("galleryInput").addEventListener("change",event => {
+  preparePhoto(event.target.files?.[0]);
+});
+$("removePhotoBtn").addEventListener("click",clearSelectedPhoto);
+
 async function checkServer(){
   setStatus("● Vérification…","");
-  try {
+  try{
     const response = await fetch(API + "/",{
       method:"GET",
       cache:"no-store",
       signal:AbortSignal.timeout(12000)
     });
 
-    if (!response.ok) throw new Error("HTTP " + response.status);
+    if(!response.ok) throw new Error("HTTP " + response.status);
 
     const text = await response.text();
-    if (!text.includes("IZZY AI server is running!")) {
+    if(!text.includes("IZZY AI server is running!")){
       throw new Error("Réponse serveur inattendue");
     }
 
     serverOnline = true;
     setStatus("● Serveur connecté","good");
     $("conversationLabel").textContent = "Serveur disponible";
-  } catch (error) {
+  }catch(error){
     serverOnline = false;
     setStatus("● Connexion à vérifier","bad");
     $("conversationLabel").textContent = "Serveur inaccessible depuis le site";
@@ -658,18 +476,26 @@ async function checkServer(){
 }
 
 async function send(){
-  if (sending) return;
+  if(sending) return;
 
   const raw = $("messageInput").value.trim();
-  if (!raw) return;
+  const imageToSend = selectedImageData;
 
-  addMessage(raw,"user");
+  if(!raw && !imageToSend) return;
+
+  const message = raw || "Analyse cette image et explique-moi ce que tu observes.";
+  addMessage(message + (imageToSend ? "\n📷 Photo jointe" : ""),"user");
   $("messageInput").value = "";
+
   sending = true;
   $("sendBtn").disabled = true;
-  $("conversationLabel").textContent = "IZZY AI réfléchit…";
+  $("cameraBtn").disabled = true;
+  $("galleryBtn").disabled = true;
+  $("conversationLabel").textContent = imageToSend
+    ? "Analyse de la photo…"
+    : "IZZY AI réfléchit…";
 
-  try {
+  try{
     const currentPreferences = getCurrentPreferences();
 
     prefs = {
@@ -679,27 +505,30 @@ async function send(){
       speakReplies:currentPreferences.speakReplies
     };
 
-    if (!writeStore(STORE.prefs,prefs)) {
-      console.warn("Les réglages n'ont pas pu être enregistrés localement.");
-    }
+    writeStore(STORE.prefs,prefs);
 
-    const response = await fetch(API + "/chat",{
+    const endpoint = imageToSend ? "/vision" : "/chat";
+    const payload = {
+      message,
+      conversationId:getConversationId(),
+      preferences:currentPreferences
+    };
+
+    if(imageToSend) payload.imageData = imageToSend;
+
+    const response = await fetch(API + endpoint,{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        message:raw,
-        conversationId:getConversationId(),
-        preferences:currentPreferences
-      }),
-      signal:AbortSignal.timeout(60000)
+      body:JSON.stringify(payload),
+      signal:AbortSignal.timeout(90000)
     });
 
     const contentType = response.headers.get("content-type") || "";
     let data;
 
-    if (contentType.includes("application/json")) {
+    if(contentType.includes("application/json")){
       data = await response.json();
-    } else {
+    }else{
       const bodyText = await response.text();
       throw new Error(
         "Réponse inattendue du serveur (HTTP " +
@@ -707,21 +536,24 @@ async function send(){
       );
     }
 
-    if (!response.ok) {
+    if(!response.ok){
       throw new Error(data.error || "Erreur HTTP " + response.status);
     }
 
-    if (typeof data.reply !== "string" || !data.reply.trim()) {
+    if(typeof data.reply !== "string" || !data.reply.trim()){
       throw new Error("Le serveur n'a pas renvoyé de réponse valide.");
     }
 
     addMessage(data.reply,"ai");
+
+    if(imageToSend) clearSelectedPhoto();
+
     $("conversationLabel").textContent = "Connecté";
     serverOnline = true;
     setStatus("● Serveur connecté","good");
     speak(data.reply);
 
-  } catch (error) {
+  }catch(error){
     console.error("Erreur IZZY AI :",error);
 
     const reason = error.name === "TimeoutError"
@@ -733,47 +565,43 @@ async function send(){
     addMessage("Erreur : " + reason,"ai");
     $("conversationLabel").textContent = "Échec de la requête";
     setStatus("● Connexion à vérifier","bad");
-
-  } finally {
+  }finally{
     sending = false;
     $("sendBtn").disabled = false;
+    $("cameraBtn").disabled = false;
+    $("galleryBtn").disabled = false;
   }
 }
 
 $("sendBtn").addEventListener("click",send);
 
-$("messageInput").addEventListener("keydown",event=>{
+$("messageInput").addEventListener("keydown",event => {
   if(event.key === "Enter" && !event.shiftKey){
     event.preventDefault();
     send();
   }
 });
 
-$("voiceBtn").addEventListener("click",()=>{
+$("voiceBtn").addEventListener("click",() => {
   voiceOn = !voiceOn;
   $("voiceBtn").textContent = voiceOn ? "🔊 Voix : activée" : "🔇 Voix : coupée";
-
-  if(!voiceOn && "speechSynthesis" in window){
-    window.speechSynthesis.cancel();
-  }
+  if(!voiceOn && "speechSynthesis" in window) window.speechSynthesis.cancel();
 });
 
-$("stopBtn").addEventListener("click",()=>{
-  if("speechSynthesis" in window){
-    window.speechSynthesis.cancel();
-  }
+$("stopBtn").addEventListener("click",() => {
+  if("speechSynthesis" in window) window.speechSynthesis.cancel();
 });
 
-$("clearChatBtn").addEventListener("click",()=>{
+$("clearChatBtn").addEventListener("click",() => {
   $("messages").replaceChildren();
   addMessage("Conversation effacée à l’écran. Tu peux continuer à discuter.","ai");
 });
 
-$("energy").addEventListener("input",()=>{
+$("energy").addEventListener("input",() => {
   $("energyValue").textContent = $("energy").value + " %";
 });
 
-$("savePersonality").addEventListener("click",()=>{
+$("savePersonality").addEventListener("click",() => {
   const current = getCurrentPreferences();
 
   prefs = {
@@ -787,7 +615,7 @@ $("savePersonality").addEventListener("click",()=>{
 
   addMessage(
     ok
-      ? "Réglages enregistrés sur cet appareil. Ils seront transmis à IZZY AI à ton prochain message."
+      ? "Réglages enregistrés sur cet appareil."
       : "Impossible d’enregistrer les réglages dans ce navigateur.",
     "ai"
   );
@@ -805,7 +633,7 @@ function renderMemories(){
     return;
   }
 
-  memories.forEach((memory,index)=>{
+  memories.forEach((memory,index) => {
     const row = document.createElement("div");
     row.className = "memory";
 
@@ -814,7 +642,7 @@ function renderMemories(){
 
     const button = document.createElement("button");
     button.textContent = "Supprimer";
-    button.addEventListener("click",()=>{
+    button.addEventListener("click",() => {
       memories.splice(index,1);
       writeStore(STORE.memories,memories);
       renderMemories();
@@ -827,7 +655,6 @@ function renderMemories(){
 
 function addMemory(){
   const value = $("memoryInput").value.trim();
-
   if(!value) return;
 
   if(memories.length >= 50){
@@ -849,14 +676,14 @@ function addMemory(){
 
 $("addMemory").addEventListener("click",addMemory);
 
-$("memoryInput").addEventListener("keydown",event=>{
+$("memoryInput").addEventListener("keydown",event => {
   if(event.key === "Enter"){
     event.preventDefault();
     addMemory();
   }
 });
 
-$("deleteMemory").addEventListener("click",()=>{
+$("deleteMemory").addEventListener("click",() => {
   if(confirm("Effacer tous les souvenirs enregistrés sur cet appareil ?")){
     memories = [];
     writeStore(STORE.memories,memories);
@@ -864,12 +691,9 @@ $("deleteMemory").addEventListener("click",()=>{
   }
 });
 
-$("exportMemory").addEventListener("click",()=>{
+$("exportMemory").addEventListener("click",() => {
   const blob = new Blob(
-    [JSON.stringify({
-      exportedAt:new Date().toISOString(),
-      memories
-    },null,2)],
+    [JSON.stringify({exportedAt:new Date().toISOString(),memories},null,2)],
     {type:"application/json"}
   );
 
@@ -878,14 +702,13 @@ $("exportMemory").addEventListener("click",()=>{
   link.href = url;
   link.download = "izzy-ai-memoires.json";
   link.click();
-
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  setTimeout(() => URL.revokeObjectURL(url),1000);
 });
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 if(SpeechRecognition){
-  $("micBtn").addEventListener("click",()=>{
+  $("micBtn").addEventListener("click",() => {
     const recognition = new SpeechRecognition();
     recognition.lang = "fr-FR";
     recognition.interimResults = false;
@@ -893,28 +716,28 @@ if(SpeechRecognition){
 
     $("micBtn").textContent = "🎙️ Écoute…";
 
-    recognition.onresult = event=>{
+    recognition.onresult = event => {
       $("messageInput").value = event.results[0][0].transcript;
       send();
     };
 
-    recognition.onerror = ()=>{
+    recognition.onerror = () => {
       $("voiceNote").textContent = "Le micro n’a pas pu démarrer. Vérifie l’autorisation du navigateur ou écris ton message.";
     };
 
-    recognition.onend = ()=>{
+    recognition.onend = () => {
       $("micBtn").textContent = "🎙️ Parler";
     };
 
-    try {
+    try{
       recognition.start();
-    } catch {
+    }catch{
       $("micBtn").textContent = "🎙️ Parler";
       $("voiceNote").textContent = "Impossible de démarrer la reconnaissance vocale.";
     }
   });
-} else {
-  $("micBtn").addEventListener("click",()=>{
+}else{
+  $("micBtn").addEventListener("click",() => {
     $("voiceNote").textContent = "La reconnaissance vocale n’est pas disponible dans ce navigateur. Tu peux toujours écrire tes messages.";
   });
 }
@@ -929,4 +752,4 @@ checkServer();
 })();
 </script>
 </body>
-</html> 
+</html>
