@@ -133,7 +133,7 @@ input[type=range]{width:100%;accent-color:var(--cyan)}
 
 <section class="card">
   <div class="card-head"><h3>MA MÉMOIRE</h3><span class="sub">Stockage local</span></div>
-  <p class="note">Les souvenirs restent dans le stockage local du navigateur et ne sont pas automatiquement envoyés au serveur. Évite les informations sensibles.</p>
+  <p class="note">Tes souvenirs restent enregistrés sur cet appareil. Ils sont transmis au serveur avec tes messages afin qu’IZZY AI puisse les utiliser pour personnaliser ses réponses. Évite les informations sensibles.</p>
   <div class="field">
     <label for="memoryInput">Ajouter un souvenir</label>
     <div class="compose">
@@ -155,6 +155,7 @@ input[type=range]{width:100%;accent-color:var(--cyan)}
 const $ = id => document.getElementById(id);
 const API = "https://izzyai.onrender.com";
 const STORE = {prefs:"izzyAI.prefs.v1",memories:"izzyAI.memories.v1"};
+
 let voiceOn = true;
 let sending = false;
 let serverOnline = false;
@@ -163,12 +164,20 @@ function readStore(key,fallback){
   try {
     const value = localStorage.getItem(key);
     return value === null ? fallback : JSON.parse(value);
-  } catch { return fallback; }
+  } catch {
+    return fallback;
+  }
 }
+
 function writeStore(key,value){
-  try { localStorage.setItem(key,JSON.stringify(value)); return true; }
-  catch { return false; }
+  try {
+    localStorage.setItem(key,JSON.stringify(value));
+    return true;
+  } catch {
+    return false;
+  }
 }
+
 function getConversationId(){
   try {
     let id = localStorage.getItem("izzyConversationId");
@@ -185,15 +194,21 @@ function getConversationId(){
 }
 
 let prefs = readStore(STORE.prefs,{
-  tone:"casual",energy:70,nickname:"",speakReplies:true
+  tone:"casual",
+  energy:70,
+  nickname:"",
+  speakReplies:true
 });
+
 let memories = readStore(STORE.memories,[]);
 if (!Array.isArray(memories)) memories = [];
+memories = memories.filter(item => typeof item === "string").slice(0,50);
 
-$("tone").value = prefs.tone || "casual";
-$("energy").value = Number(prefs.energy ?? 70);
+$("tone").value = ["casual","calm","funny","direct"].includes(prefs.tone)
+  ? prefs.tone : "casual";
+$("energy").value = Math.max(0,Math.min(100,Number(prefs.energy ?? 70)));
 $("energyValue").textContent = $("energy").value + " %";
-$("nickname").value = prefs.nickname || "";
+$("nickname").value = typeof prefs.nickname === "string" ? prefs.nickname : "";
 $("speakReplies").checked = prefs.speakReplies !== false;
 
 function setStatus(text,kind){
@@ -201,6 +216,7 @@ function setStatus(text,kind){
   node.textContent = text;
   node.className = "status" + (kind ? " " + kind : "");
 }
+
 function addMessage(text,who){
   const node = document.createElement("div");
   node.className = "msg " + who;
@@ -208,6 +224,7 @@ function addMessage(text,who){
   $("messages").appendChild(node);
   $("messages").scrollTop = $("messages").scrollHeight;
 }
+
 function speak(text){
   if (!voiceOn || !$("speakReplies").checked || !("speechSynthesis" in window)) return;
   window.speechSynthesis.cancel();
@@ -215,6 +232,16 @@ function speak(text){
   utterance.lang = "fr-FR";
   utterance.rate = 0.98;
   window.speechSynthesis.speak(utterance);
+}
+
+function getCurrentPreferences(){
+  return {
+    tone:$("tone").value,
+    energy:Number($("energy").value),
+    nickname:$("nickname").value.trim().slice(0,32),
+    speakReplies:$("speakReplies").checked,
+    memories:memories.filter(item => typeof item === "string").slice(0,50)
+  };
 }
 
 async function checkServer(){
@@ -225,11 +252,14 @@ async function checkServer(){
       cache:"no-store",
       signal:AbortSignal.timeout(12000)
     });
+
     if (!response.ok) throw new Error("HTTP " + response.status);
+
     const text = await response.text();
     if (!text.includes("IZZY AI server is running!")) {
       throw new Error("Réponse serveur inattendue");
     }
+
     serverOnline = true;
     setStatus("● Serveur connecté","good");
     $("conversationLabel").textContent = "Serveur disponible";
@@ -243,6 +273,7 @@ async function checkServer(){
 
 async function send(){
   if (sending) return;
+
   const raw = $("messageInput").value.trim();
   if (!raw) return;
 
@@ -253,48 +284,71 @@ async function send(){
   $("conversationLabel").textContent = "IZZY AI réfléchit…";
 
   try {
+    const currentPreferences = getCurrentPreferences();
+
+    // Enregistre les réglages actuels sur cet appareil.
+    prefs = {
+      tone:currentPreferences.tone,
+      energy:currentPreferences.energy,
+      nickname:currentPreferences.nickname,
+      speakReplies:currentPreferences.speakReplies
+    };
+
+    if (!writeStore(STORE.prefs,prefs)) {
+      console.warn("Les réglages n'ont pas pu être enregistrés localement.");
+    }
+
     const response = await fetch(API + "/chat",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
         message:raw,
-        conversationId:getConversationId()
+        conversationId:getConversationId(),
+        preferences:currentPreferences
       }),
       signal:AbortSignal.timeout(60000)
     });
 
     const contentType = response.headers.get("content-type") || "";
     let data;
+
     if (contentType.includes("application/json")) {
       data = await response.json();
     } else {
       const bodyText = await response.text();
-      throw new Error("Le serveur a renvoyé une réponse inattendue (HTTP " + response.status + "). " + bodyText.slice(0,160));
+      throw new Error(
+        "Réponse inattendue du serveur (HTTP " +
+        response.status + "). " + bodyText.slice(0,160)
+      );
     }
 
     if (!response.ok) {
       throw new Error(data.error || "Erreur HTTP " + response.status);
     }
+
     if (typeof data.reply !== "string" || !data.reply.trim()) {
-      throw new Error("Le serveur n’a pas renvoyé de réponse valide.");
+      throw new Error("Le serveur n'a pas renvoyé de réponse valide.");
     }
 
     addMessage(data.reply,"ai");
     $("conversationLabel").textContent = "Connecté";
+    serverOnline = true;
     setStatus("● Serveur connecté","good");
     speak(data.reply);
+
   } catch (error) {
     console.error("Erreur IZZY AI :",error);
+
     const reason = error.name === "TimeoutError"
-      ? "Le serveur met trop de temps à répondre. Réessaie dans un instant."
-      : error.message && error.message.startsWith("Erreur HTTP")
+      ? "Le serveur met trop de temps à répondre. Réessaie."
+      : error.message && !error.message.includes("Failed to fetch")
         ? error.message
-        : error.message && !error.message.includes("Failed to fetch")
-          ? error.message
-          : "Impossible de joindre le serveur. Vérifie la configuration CORS et le service Render.";
+        : "Impossible de joindre le serveur. Vérifie Render et la configuration CORS.";
+
     addMessage("Erreur : " + reason,"ai");
     $("conversationLabel").textContent = "Échec de la requête";
     setStatus("● Connexion à vérifier","bad");
+
   } finally {
     sending = false;
     $("sendBtn").disabled = false;
@@ -302,20 +356,29 @@ async function send(){
 }
 
 $("sendBtn").addEventListener("click",send);
+
 $("messageInput").addEventListener("keydown",event=>{
   if(event.key === "Enter" && !event.shiftKey){
     event.preventDefault();
     send();
   }
 });
+
 $("voiceBtn").addEventListener("click",()=>{
   voiceOn = !voiceOn;
   $("voiceBtn").textContent = voiceOn ? "🔊 Voix : activée" : "🔇 Voix : coupée";
-  if(!voiceOn && "speechSynthesis" in window) window.speechSynthesis.cancel();
+
+  if(!voiceOn && "speechSynthesis" in window){
+    window.speechSynthesis.cancel();
+  }
 });
+
 $("stopBtn").addEventListener("click",()=>{
-  if("speechSynthesis" in window) window.speechSynthesis.cancel();
+  if("speechSynthesis" in window){
+    window.speechSynthesis.cancel();
+  }
 });
+
 $("clearChatBtn").addEventListener("click",()=>{
   $("messages").replaceChildren();
   addMessage("Conversation effacée à l’écran. Tu peux continuer à discuter.","ai");
@@ -324,20 +387,31 @@ $("clearChatBtn").addEventListener("click",()=>{
 $("energy").addEventListener("input",()=>{
   $("energyValue").textContent = $("energy").value + " %";
 });
+
 $("savePersonality").addEventListener("click",()=>{
+  const current = getCurrentPreferences();
+
   prefs = {
-    tone:$("tone").value,
-    energy:Number($("energy").value),
-    nickname:$("nickname").value.trim(),
-    speakReplies:$("speakReplies").checked
+    tone:current.tone,
+    energy:current.energy,
+    nickname:current.nickname,
+    speakReplies:current.speakReplies
   };
+
   const ok = writeStore(STORE.prefs,prefs);
-  addMessage(ok ? "Réglages enregistrés sur cet appareil." : "Impossible d’enregistrer les réglages dans ce navigateur.","ai");
+
+  addMessage(
+    ok
+      ? "Réglages enregistrés sur cet appareil. Ils seront transmis à IZZY AI à ton prochain message."
+      : "Impossible d’enregistrer les réglages dans ce navigateur.",
+    "ai"
+  );
 });
 
 function renderMemories(){
   const root = $("memoryList");
   root.replaceChildren();
+
   if(!memories.length){
     const p = document.createElement("p");
     p.className = "sub";
@@ -345,11 +419,14 @@ function renderMemories(){
     root.appendChild(p);
     return;
   }
+
   memories.forEach((memory,index)=>{
     const row = document.createElement("div");
     row.className = "memory";
+
     const span = document.createElement("span");
     span.textContent = memory;
+
     const button = document.createElement("button");
     button.textContent = "Supprimer";
     button.addEventListener("click",()=>{
@@ -357,30 +434,43 @@ function renderMemories(){
       writeStore(STORE.memories,memories);
       renderMemories();
     });
+
     row.append(span,button);
     root.appendChild(row);
   });
 }
+
 function addMemory(){
   const value = $("memoryInput").value.trim();
+
   if(!value) return;
+
   if(memories.length >= 50){
     alert("Limite de 50 souvenirs.");
     return;
   }
+
   memories.push(value);
+
   if(!writeStore(STORE.memories,memories)){
     memories.pop();
     alert("Le navigateur n’a pas permis d’enregistrer ce souvenir.");
     return;
   }
+
   $("memoryInput").value = "";
   renderMemories();
 }
+
 $("addMemory").addEventListener("click",addMemory);
+
 $("memoryInput").addEventListener("keydown",event=>{
-  if(event.key === "Enter") addMemory();
+  if(event.key === "Enter"){
+    event.preventDefault();
+    addMemory();
+  }
 });
+
 $("deleteMemory").addEventListener("click",()=>{
   if(confirm("Effacer tous les souvenirs enregistrés sur cet appareil ?")){
     memories = [];
@@ -388,39 +478,52 @@ $("deleteMemory").addEventListener("click",()=>{
     renderMemories();
   }
 });
+
 $("exportMemory").addEventListener("click",()=>{
   const blob = new Blob(
-    [JSON.stringify({exportedAt:new Date().toISOString(),memories},null,2)],
+    [JSON.stringify({
+      exportedAt:new Date().toISOString(),
+      memories
+    },null,2)],
     {type:"application/json"}
   );
+
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
   link.download = "izzy-ai-memoires.json";
   link.click();
+
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
 if(SpeechRecognition){
   $("micBtn").addEventListener("click",()=>{
     const recognition = new SpeechRecognition();
     recognition.lang = "fr-FR";
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
+
     $("micBtn").textContent = "🎙️ Écoute…";
+
     recognition.onresult = event=>{
       $("messageInput").value = event.results[0][0].transcript;
       send();
     };
+
     recognition.onerror = ()=>{
       $("voiceNote").textContent = "Le micro n’a pas pu démarrer. Vérifie l’autorisation du navigateur ou écris ton message.";
     };
+
     recognition.onend = ()=>{
       $("micBtn").textContent = "🎙️ Parler";
     };
-    try { recognition.start(); }
-    catch {
+
+    try {
+      recognition.start();
+    } catch {
       $("micBtn").textContent = "🎙️ Parler";
       $("voiceNote").textContent = "Impossible de démarrer la reconnaissance vocale.";
     }
@@ -432,9 +535,11 @@ if(SpeechRecognition){
 }
 
 renderMemories();
+
 if(!("speechSynthesis" in window)){
   $("voiceNote").textContent += " La lecture vocale n’est pas disponible.";
 }
+
 checkServer();
 })();
 </script>
