@@ -1,79 +1,105 @@
+
 <!doctype html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#090b13">
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/lsrael23/IzzyAI/main/05DA307C-CFC0-4BBE-A61C-1560A7C4F3FA.png">
+<link rel="icon" href="https://raw.githubusercontent.com/lsrael23/IzzyAI/main/05DA307C-CFC0-4BBE-A61C-1560A7C4F3FA.png">
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/lsrael23/IzzyAI/main/05DA307C-CFC0-4BBE-A61C-1560A7C4F3FA.png">
 <title>IZZY AI — Compagnon</title>
+
 <style>
-:root{color-scheme:dark;--bg:#090b13;--panel:#111522;--panel2:#171d2d;--line:#293047;--text:#f4f6ff;--muted:#9da8c2;--cyan:#65e4ff;--violet:#a98cff;--pink:#fa8fce;--good:#78edbd}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -10%,#252044 0%,var(--bg) 45%);font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;color:var(--text);min-height:100vh}
-button,input,textarea,select{font:inherit}button{cursor:pointer;color:inherit;border:1px solid var(--line);background:var(--panel2);border-radius:14px;padding:11px 14px}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
-.app{max-width:760px;margin:0 auto;padding:env(safe-area-inset-top) 16px calc(24px + env(safe-area-inset-bottom));}
+:root{color-scheme:dark;--bg:#090b13;--panel:#111522;--panel2:#171d2d;--line:#293047;--text:#f4f6ff;--muted:#9da8c2;--cyan:#65e4ff;--violet:#a98cff;--good:#78edbd;--bad:#ff929c}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% -10%,#252044 0%,var(--bg) 45%);font-family:Inter,system-ui,-apple-system,sans-serif;color:var(--text);min-height:100vh}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer;color:inherit;border:1px solid var(--line);background:var(--panel2);border-radius:14px;padding:11px 14px}
+button:disabled{opacity:.55;cursor:wait}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.app{max-width:760px;margin:0 auto;padding:env(safe-area-inset-top) 16px calc(24px + env(safe-area-inset-bottom))}
 header{display:flex;align-items:center;justify-content:space-between;padding:20px 2px 16px;gap:12px}
-..brand{display:flex;gap:11px;align-items:center}
-.logo{
-  width:42px;
-  height:42px;
-  border-radius:14px;
-  object-fit:contain;
-  background:#090b13;
-  box-shadow:0 0 18px #d6a83f35;
-}
-.brand h1{font-size:17px;letter-spacing:.13em;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:12px}
-.status{font-size:11px;color:var(--good);border:1px solid #78edbd45;background:#78edbd12;padding:7px 9px;border-radius:999px;white-space:nowrap}
-.hero{text-align:center;padding:18px 8px 20px}.orb{margin:0 auto 17px;width:142px;height:142px;border-radius:50%;display:grid;place-items:center;position:relative;background:radial-gradient(circle at 35% 30%,#c6f7ff 0%,#65e4ff 12%,#7770ff 44%,#201638 72%);box-shadow:0 0 35px #8b80ff4a, inset -12px -15px 28px #080b1a;animation:float 5s ease-in-out infinite}
-.orb:before{content:"";position:absolute;inset:-9px;border-radius:50%;border:1px solid #65e4ff55;box-shadow:0 0 25px #65e4ff18}.orb:after{content:"";position:absolute;inset:13px;border-radius:50%;border:1px solid #ffffff30}
-.orb span{font-size:34px;font-weight:800;letter-spacing:-.08em;color:#101225;text-shadow:0 1px #ffffff88}
+.brand{display:flex;gap:11px;align-items:center;min-width:0}
+.logo{width:42px;height:42px;border-radius:14px;object-fit:contain;background:#090b13;box-shadow:0 0 18px #d6a83f35}
+.brand h1{font-size:17px;letter-spacing:.13em;margin:0}
+.brand p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.status{font-size:11px;color:var(--muted);border:1px solid var(--line);background:#111522;padding:7px 9px;border-radius:999px;white-space:nowrap}
+.status.good{color:var(--good);border-color:#78edbd45}
+.status.bad{color:var(--bad);border-color:#ff929c45}
+.hero{text-align:center;padding:18px 8px 20px}
+.orb{margin:0 auto 17px;width:142px;height:142px;border-radius:50%;display:grid;place-items:center;position:relative;background:radial-gradient(circle at 35% 30%,#c6f7ff 0%,#65e4ff 12%,#7770ff 44%,#201638 72%);box-shadow:0 0 35px #8b80ff4a,inset -12px -15px 28px #080b1a;animation:float 5s ease-in-out infinite;overflow:hidden}
+.orb:before{content:"";position:absolute;inset:-9px;border-radius:50%;border:1px solid #65e4ff55;pointer-events:none}
+.orb img{width:100%;height:100%;object-fit:contain;border-radius:50%}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-.hero h2{font-size:27px;margin:0 0 7px;letter-spacing:-.04em}.hero p{margin:0 auto;color:var(--muted);font-size:14px;max-width:430px;line-height:1.5}
-.pills{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:15px}.pill{font-size:11px;color:#c8d1e8;border:1px solid var(--line);border-radius:999px;padding:6px 9px;background:#11152299}
+.hero h2{font-size:27px;margin:0 0 7px;letter-spacing:-.04em}
+.hero p{margin:0 auto;color:var(--muted);font-size:14px;max-width:430px;line-height:1.5}
+.pills{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:15px}
+.pill{font-size:11px;color:#c8d1e8;border:1px solid var(--line);border-radius:999px;padding:6px 9px;background:#11152299}
 .card{background:linear-gradient(160deg,#151a2aee,#0f1320ee);border:1px solid var(--line);border-radius:20px;padding:16px;margin:12px 0;box-shadow:0 10px 40px #0002}
-.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.card h3{font-size:14px;margin:0;letter-spacing:.02em}.sub{font-size:12px;color:var(--muted)}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.card h3{font-size:14px;margin:0;letter-spacing:.02em}
+.sub{font-size:12px;color:var(--muted)}
 .messages{display:flex;flex-direction:column;gap:10px;max-height:330px;overflow:auto;padding:2px 1px 10px;scroll-behavior:smooth}
-.msg{max-width:88%;padding:11px 13px;border-radius:15px;font-size:14px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}.msg.ai{align-self:flex-start;background:#1a2032;border:1px solid #2a344d;border-bottom-left-radius:5px}.msg.user{align-self:flex-end;background:linear-gradient(135deg,#5548a5,#44376f);border:1px solid #9380ff55;border-bottom-right-radius:5px}
-.compose{display:flex;gap:8px;align-items:flex-end}.compose textarea{resize:vertical;min-height:45px;max-height:120px;flex:1;background:#090d18;border:1px solid var(--line);border-radius:14px;padding:12px;color:var(--text);min-width:0}.send{background:linear-gradient(135deg,var(--cyan),var(--violet));border:0;color:#0a0d17;font-weight:800;min-width:48px}.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.tools button{font-size:12px;padding:9px 11px}.primary{background:#1b2440;border-color:#4b5980}.active{border-color:var(--cyan)!important;box-shadow:0 0 0 1px #65e4ff25 inset}
-label{font-size:12px;color:#c8d1e8;display:block;margin-bottom:7px}.field{margin:13px 0}.field input[type=text],.field textarea,.field select{width:100%;background:#090d18;border:1px solid var(--line);border-radius:12px;padding:11px;color:var(--text)}.field textarea{min-height:70px;resize:vertical}
-input[type=range]{width:100%;accent-color:var(--cyan)}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.toggleline{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #252c40}.toggleline:last-child{border-bottom:0}.toggleline strong{font-size:13px;font-weight:600}.toggleline small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.toggleline input{accent-color:var(--cyan);width:18px;height:18px}
-.memory-list{display:flex;flex-direction:column;gap:8px}.memory{display:flex;align-items:flex-start;gap:8px;border:1px solid var(--line);background:#0b101b;border-radius:12px;padding:10px}.memory span{font-size:13px;line-height:1.4;flex:1}.memory button{padding:5px 8px;font-size:11px;border-radius:9px}
-.note{font-size:12px;color:var(--muted);line-height:1.55}.warn{color:#ffdca2}.footer{text-align:center;color:#6f7a96;font-size:11px;padding:12px 0 4px}
+.msg{max-width:88%;padding:11px 13px;border-radius:15px;font-size:14px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.ai{align-self:flex-start;background:#1a2032;border:1px solid #2a344d;border-bottom-left-radius:5px}
+.msg.user{align-self:flex-end;background:linear-gradient(135deg,#5548a5,#44376f);border:1px solid #9380ff55;border-bottom-right-radius:5px}
+.compose{display:flex;gap:8px;align-items:flex-end}
+.compose textarea{resize:vertical;min-height:45px;max-height:120px;flex:1;background:#090d18;border:1px solid var(--line);border-radius:14px;padding:12px;color:var(--text);min-width:0}
+.send{background:linear-gradient(135deg,var(--cyan),var(--violet));border:0;color:#0a0d17;font-weight:800;min-width:48px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tools button{font-size:12px;padding:9px 11px}
+.primary{background:#1b2440;border-color:#4b5980}
+label{font-size:12px;color:#c8d1e8;display:block;margin-bottom:7px}
+.field{margin:13px 0}
+.field input[type=text],.field textarea,.field select{width:100%;background:#090d18;border:1px solid var(--line);border-radius:12px;padding:11px;color:var(--text)}
+input[type=range]{width:100%;accent-color:var(--cyan)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.toggleline{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #252c40}
+.toggleline:last-child{border-bottom:0}
+.toggleline strong{font-size:13px;font-weight:600}
+.toggleline small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+.toggleline input{accent-color:var(--cyan);width:18px;height:18px}
+.memory-list{display:flex;flex-direction:column;gap:8px}
+.memory{display:flex;align-items:flex-start;gap:8px;border:1px solid var(--line);background:#0b101b;border-radius:12px;padding:10px}
+.memory span{font-size:13px;line-height:1.4;flex:1;overflow-wrap:anywhere}
+.memory button{padding:5px 8px;font-size:11px;border-radius:9px}
+.note{font-size:12px;color:var(--muted);line-height:1.55}
+.footer{text-align:center;color:#6f7a96;font-size:11px;padding:12px 0 4px}
 @media(min-width:620px){.hero{padding-top:28px}.orb{width:158px;height:158px}.hero h2{font-size:31px}.app{padding-left:22px;padding-right:22px}}
+@media(prefers-reduced-motion:reduce){.orb{animation:none}}
 </style>
 </head>
+
 <body>
 <div class="app">
 <header>
   <div class="brand">
-  <img
-    class="logo"
-    src="https://raw.githubusercontent.com/lsrael23/IzzyAI/main/05DA307C-CFC0-4BBE-A61C-1560A7C4F3FA.png"
-    alt="Logo IZZY AI"
-  >
-  <div>
-    <h1>IZZY AI</h1>
-    <p>COMPAGNON • PROTOTYPE V1</p>
+    <img class="logo" src="https://raw.githubusercontent.com/lsrael23/IzzyAI/main/05DA307C-CFC0-4BBE-A61C-1560A7C4F3FA.png" alt="Logo IZZY AI">
+    <div><h1>IZZY AI</h1><p>COMPAGNON • VERSION 1</p></div>
   </div>
-</div>
-  <div class="status" id="status">● Mode démo</div>
+  <div class="status" id="status" role="status">● Vérification…</div>
 </header>
 
 <section class="hero">
-
-<div class="orb"><img src="https://raw.githubusercontent.com/lsrael23/IzzyAI/main/05DA307C-CFC0-4BBE-A61C-1560A7C4F3FA.png" alt="Robot IZZY AI" style="width:100%;height:100%;object-fit:contain;border-radius:50%;"></div>
+  <div class="orb">
+    <img src="https://raw.githubusercontent.com/lsrael23/IzzyAI/main/05DA307C-CFC0-4BBE-A61C-1560A7C4F3FA.png" alt="Robot IZZY AI">
+  </div>
   <h2>On parle ?</h2>
-  <p>Un compagnon IA en construction. Parle-moi, règle ma personnalité et choisis ce que je peux mémoriser.</p>
-  <div class="pills"><span class="pill">Vocal prêt si navigateur compatible</span><span class="pill">Mémoire locale</span><span class="pill">Aucune clé API requise</span></div>
+  <p>Ton compagnon IA. Discute, règle sa personnalité et conserve tes souvenirs sur cet appareil.</p>
+  <div class="pills">
+    <span class="pill">Assistant IA</span>
+    <span class="pill">Mémoire locale</span>
+    <span class="pill">Commandes vocales selon le navigateur</span>
+  </div>
 </section>
 
 <section class="card">
-  <div class="card-head"><h3>CONVERSATION</h3><span class="sub" id="conversationLabel">Mode démo local</span></div>
+  <div class="card-head"><h3>CONVERSATION</h3><span class="sub" id="conversationLabel">Connexion au serveur…</span></div>
   <div class="messages" id="messages" aria-live="polite">
-    <div class="msg ai">Wesh ! Moi c’est IZZY AI. Pour l’instant je suis en mode démo : je peux répondre à quelques messages simples et parler avec la voix de ton navigateur. On améliorera mon cerveau après.</div>
+    <div class="msg ai">Wesh ! Moi, c’est IZZY AI. Envoie-moi ton premier message !</div>
   </div>
   <div class="compose">
-    <textarea id="messageInput" rows="1" placeholder="Écris-moi quelque chose…" aria-label="Ton message"></textarea>
+    <textarea id="messageInput" rows="1" maxlength="4000" placeholder="Écris-moi quelque chose…" aria-label="Ton message"></textarea>
     <button class="send" id="sendBtn" aria-label="Envoyer">➤</button>
   </div>
   <div class="tools">
@@ -82,171 +108,334 @@ input[type=range]{width:100%;accent-color:var(--cyan)}.row{display:flex;align-it
     <button id="stopBtn">■ Stop voix</button>
     <button id="clearChatBtn">Effacer le chat</button>
   </div>
-  <p class="note" id="voiceNote">Sur iPhone, la lecture vocale dépend des réglages du navigateur. La reconnaissance vocale peut ne pas être disponible dans Safari : dans ce cas, écris ton message.</p>
+  <p class="note" id="voiceNote">La lecture vocale dépend des capacités du navigateur. Si le micro ne fonctionne pas, écris ton message.</p>
 </section>
 
 <section class="card">
-  <div class="card-head"><h3>PERSONNALITÉ</h3><span class="sub">Modifiable</span></div>
-  <div class="field"><label for="tone">Style de réponse</label>
-    <select id="tone"><option value="casual">Naturel et familier</option><option value="calm">Calme et posé</option><option value="funny">Drôle et taquin</option><option value="direct">Cash et direct</option></select>
+  <div class="card-head"><h3>PERSONNALITÉ</h3><span class="sub">Réglages</span></div>
+  <div class="field">
+    <label for="tone">Style de réponse</label>
+    <select id="tone">
+      <option value="casual">Naturel et familier</option>
+      <option value="calm">Calme et posé</option>
+      <option value="funny">Drôle et taquin</option>
+      <option value="direct">Cash et direct</option>
+    </select>
   </div>
-  <div class="field"><div class="row"><label for="energy">Énergie</label><span class="sub" id="energyValue">70 %</span></div><input id="energy" type="range" min="0" max="100" value="70"></div>
+  <div class="field">
+    <div class="row"><label for="energy">Énergie</label><span class="sub" id="energyValue">70 %</span></div>
+    <input id="energy" type="range" min="0" max="100" value="70">
+  </div>
   <div class="field"><label for="nickname">Comment t’appeler ?</label><input id="nickname" type="text" maxlength="32" placeholder="Ex. mek, frérot…"></div>
   <div class="toggleline"><div><strong>Répondre à voix haute</strong><small>Lire les réponses avec la voix du navigateur</small></div><input id="speakReplies" type="checkbox" checked></div>
   <button id="savePersonality" class="primary" style="width:100%;margin-top:13px">Enregistrer les réglages</button>
 </section>
 
 <section class="card">
-  <div class="card-head"><h3>MA MÉMOIRE</h3><span class="sub">Stockée sur cet appareil</span></div>
-  <p class="note">Dans cette démo, les souvenirs sont conservés dans le stockage local du navigateur. Ils ne sont pas envoyés à un serveur. Évite d’y enregistrer des informations sensibles.</p>
-  <div class="field"><label for="memoryInput">Ajouter un souvenir</label><div class="compose"><input id="memoryInput" type="text" maxlength="180" placeholder="Ex. J’aime les réponses courtes" style="flex:1;min-width:0;background:#090d18;border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--text)"><button id="addMemory" class="primary">Ajouter</button></div></div>
+  <div class="card-head"><h3>MA MÉMOIRE</h3><span class="sub">Stockage local</span></div>
+  <p class="note">Les souvenirs restent dans le stockage local du navigateur et ne sont pas automatiquement envoyés au serveur. Évite les informations sensibles.</p>
+  <div class="field">
+    <label for="memoryInput">Ajouter un souvenir</label>
+    <div class="compose">
+      <input id="memoryInput" type="text" maxlength="180" placeholder="Ex. J’aime les réponses courtes" style="flex:1;min-width:0;background:#090d18;border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--text)">
+      <button id="addMemory" class="primary">Ajouter</button>
+    </div>
+  </div>
   <div id="memoryList" class="memory-list"><p class="sub">Aucun souvenir enregistré.</p></div>
   <div class="tools"><button id="exportMemory">Exporter les souvenirs</button><button id="deleteMemory">Tout effacer</button></div>
 </section>
 
-<section class="card">
-  <div class="card-head"><h3>PRÉPARÉ POUR LE ROBOT</h3><span class="sub">Étape future</span></div>
-  <p class="note">L’interface est séparée du futur moteur IA et du contrôle matériel. Plus tard, un serveur sécurisé pourra connecter un modèle IA et transmettre des commandes autorisées à un robot. Cette version ne contrôle aucun moteur et n’appelle aucune API.</p>
-  <div class="toggleline"><div><strong>Connexion à un modèle IA</strong><small>Non configurée — aucune clé API demandée</small></div><span class="sub">À venir</span></div>
-  <div class="toggleline"><div><strong>Caméra et capteurs du robot</strong><small>À intégrer dans une version ultérieure</small></div><span class="sub">À venir</span></div>
-</section>
-<div class="footer">IZZY AI • Prototype local v1 • Aucun compte requis</div>
+<div class="footer">IZZY AI • Assistant connecté à un serveur distant</div>
 </div>
+
 <script>
 (() => {
- const $ = id => document.getElementById(id);
- const STORE = {prefs:"izzyAI.prefs.v1", memories:"izzyAI.memories.v1"};
- let voiceOn = true;
- const safeRead = (key, fallback) => { try { const x = localStorage.getItem(key); return x ? JSON.parse(x) : fallback; } catch { return fallback; } };
- const safeWrite = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; } };
- let prefs = safeRead(STORE.prefs, {tone:"casual", energy:70, nickname:"", speakReplies:true});
- let memories = safeRead(STORE.memories, []);
- $("tone").value = prefs.tone || "casual"; $("energy").value = prefs.energy ?? 70;
- $("energyValue").textContent = ($("energy").value)+" %"; $("nickname").value = prefs.nickname || "";
- $("speakReplies").checked = prefs.speakReplies !== false;
+"use strict";
 
- function addMessage(text, who) {
-   const node = document.createElement("div"); node.className = "msg " + who; node.textContent = text;
-   $("messages").appendChild(node); $("messages").scrollTop = $("messages").scrollHeight;
- }
- function speak(text) {
-   if (!voiceOn || !$("speakReplies").checked || !("speechSynthesis" in window)) return;
-   window.speechSynthesis.cancel();
-   const utter = new SpeechSynthesisUtterance(text); utter.lang = "fr-FR"; utter.rate = 0.98;
-   window.speechSynthesis.speak(utter);
- }
- function personaPrefix() {
-   const name = prefs.nickname ? prefs.nickname + ", " : "";
-   if (prefs.tone === "calm") return name;
-   if (prefs.tone === "funny") return name;
-   if (prefs.tone === "direct") return name;
-   return name;
- }
- function demoReply(raw) {
-   const t = raw.toLowerCase(); const prefix = personaPrefix();
-   if (/^(salut|slt|bonjour|hello|yo|wesh|hey)\b/.test(t)) return prefix + (prefs.tone==="calm" ? "Salut ! Comment ça va ?" : "Wesh ! Ça dit quoi ? Je suis en mode démo pour l’instant, mais je suis là.");
-   if (t.includes("qui es-tu") || t.includes("qui es tu") || t.includes("ton nom")) return "Je suis IZZY AI, un prototype de compagnon vocal. Pour l’instant, mes réponses sont locales et limitées ; je ne suis pas encore connecté à un vrai modèle d’IA.";
-   if (t.includes("mémor") || t.includes("souvenir")) return "Tu peux ajouter et gérer tes souvenirs dans la section « Ma mémoire ». Dans cette démo, ils restent dans le navigateur de cet appareil.";
-   if (t.includes("robot") || t.includes("corps")) return "Le plan est de séparer la conversation, la mémoire et le contrôle matériel. Plus tard, un serveur sécurisé pourra faire le lien avec un robot. Pour l’instant, je ne contrôle aucun matériel.";
-   if (t.includes("comment ça va") || t.includes("ça va")) return prefs.tone==="funny" ? "Ça roule dans les circuits 😄 Et toi ?" : "Ça va, prêt à discuter. Et toi ?";
-   if (t.includes("merci")) return prefs.tone==="direct" ? "Pas de souci." : "Avec plaisir !";
-   if (t.includes("blague") || t.includes("fais-moi rire")) return "Pourquoi le robot prend-il un parapluie ? Parce qu’il ne veut pas avoir les circuits mouillés. Bon, elle est pas incroyable celle-là.";
-   if (t.includes("aime") || t.includes("goût") || t.includes("manger")) return "Je peux parler de nourriture, mais je ne goûte rien réellement. Un jour, un robot équipé de capteurs pourrait mesurer certaines propriétés, sans que ça prouve qu’il ressent le goût comme un humain.";
-   if (t.includes("aide") || t.includes("construire")) return "On peut avancer étape par étape. Dis-moi l’objectif précis, ton budget et le matériel dont tu disposes. Note : je suis encore en mode démo et je ne comprends pas tout comme ChatGPT.";
-   const endings = {
-    casual:"Je suis encore en mode démo, donc mon cerveau est limité pour l’instant. On pourra connecter un vrai modèle IA plus tard.",
-    calm:"Je n’ai pas encore de modèle d’IA connecté. Cette version sert à tester l’interface et les commandes de base.",
-    funny:"Mon cerveau de démo vient de sécher là 😭 Connecte-moi à un vrai modèle plus tard et je pourrai répondre beaucoup mieux.",
-    direct:"Je ne sais pas traiter ça correctement en mode démo. Il faudra connecter un vrai modèle IA."
-   };
-   return prefix + (endings[prefs.tone] || endings.casual);
- }
- 
-async function send() {
-  const raw = $("messageInput").value.trim();
-  if (!raw) return;
+const $ = id => document.getElementById(id);
+const API = "https://izzyai.onrender.com";
+const STORE = {prefs:"izzyAI.prefs.v1",memories:"izzyAI.memories.v1"};
+let voiceOn = true;
+let sending = false;
+let serverOnline = false;
 
-  addMessage(raw, "user");
-  $("messageInput").value = "";
-const conversationId =
-  localStorage.getItem("izzyConversationId") || crypto.randomUUID();
-
-localStorage.setItem("izzyConversationId", conversationId);
+function readStore(key,fallback){
   try {
-    const response = await fetch("https://izzyai.onrender.com/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-  message: raw,
-  conversationId: conversationId
-})
-    });
-
-    const data = await response.json();
-    const reply = data.reply || data.error || "Erreur du serveur.";
-
-    addMessage(reply, "ai");
-
-    if (response.ok) {
-      speak(reply);
+    const value = localStorage.getItem(key);
+    return value === null ? fallback : JSON.parse(value);
+  } catch { return fallback; }
+}
+function writeStore(key,value){
+  try { localStorage.setItem(key,JSON.stringify(value)); return true; }
+  catch { return false; }
+}
+function getConversationId(){
+  try {
+    let id = localStorage.getItem("izzyConversationId");
+    if (!id) {
+      id = window.crypto && typeof window.crypto.randomUUID === "function"
+        ? window.crypto.randomUUID()
+        : "izzy-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
+      localStorage.setItem("izzyConversationId",id);
     }
-  } catch (error) {
-    addMessage(
-      "Je n'arrive pas à joindre mon serveur. Réessaie dans un instant.",
-      "ai"
-    );
+    return id;
+  } catch {
+    return "izzy-" + Date.now().toString(36);
   }
 }
 
- $("sendBtn").addEventListener("click", send);
- $("messageInput").addEventListener("keydown", e => { if (e.key==="Enter" && !e.shiftKey) { e.preventDefault(); send(); }});
- $("voiceBtn").addEventListener("click", () => { voiceOn = !voiceOn; $("voiceBtn").textContent = voiceOn ? "🔊 Voix : activée" : "🔇 Voix : coupée"; if(!voiceOn && "speechSynthesis" in window) speechSynthesis.cancel(); });
- $("stopBtn").addEventListener("click", () => { if ("speechSynthesis" in window) speechSynthesis.cancel(); });
- $("clearChatBtn").addEventListener("click", () => { $("messages").replaceChildren(); addMessage("Conversation effacée. On repart de zéro.", "ai"); });
- $("energy").addEventListener("input", () => $("energyValue").textContent = $("energy").value + " %");
- $("savePersonality").addEventListener("click", () => {
-   prefs = {tone:$("tone").value, energy:Number($("energy").value), nickname:$("nickname").value.trim(), speakReplies:$("speakReplies").checked};
-   const ok = safeWrite(STORE.prefs, prefs); addMessage(ok ? "Réglages enregistrés sur cet appareil." : "Le navigateur n’a pas permis d’enregistrer les réglages.", "ai");
- });
- function renderMemories() {
-   const root = $("memoryList"); root.replaceChildren();
-   if (!memories.length) { const p=document.createElement("p"); p.className="sub"; p.textContent="Aucun souvenir enregistré."; root.appendChild(p); return; }
-   memories.forEach((m,i) => {
-     const row=document.createElement("div"); row.className="memory";
-     const span=document.createElement("span"); span.textContent=m;
-     const btn=document.createElement("button"); btn.textContent="Supprimer"; btn.setAttribute("aria-label","Supprimer le souvenir");
-     btn.addEventListener("click",()=>{memories.splice(i,1);safeWrite(STORE.memories,memories);renderMemories();});
-     row.append(span,btn); root.appendChild(row);
-   });
- }
- $("addMemory").addEventListener("click", () => {
-   const val=$("memoryInput").value.trim(); if(!val)return;
-   if(memories.length>=50){alert("Limite de 50 souvenirs dans cette démo.");return;}
-   memories.push(val); safeWrite(STORE.memories,memories); $("memoryInput").value=""; renderMemories();
- });
- $("memoryInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("addMemory").click();});
- $("deleteMemory").addEventListener("click",()=>{if(confirm("Effacer tous les souvenirs enregistrés sur cet appareil ?")){memories=[];safeWrite(STORE.memories,memories);renderMemories();}});
- $("exportMemory").addEventListener("click",()=>{
-   const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),memories},null,2)],{type:"application/json"});
-   const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="izzy-ai-memoires.json"; a.click(); URL.revokeObjectURL(url);
- });
- const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
- if (SpeechRecognition) {
-   $("micBtn").addEventListener("click", () => {
-     const rec = new SpeechRecognition(); rec.lang="fr-FR"; rec.interimResults=false; rec.maxAlternatives=1;
-     $("micBtn").textContent="🎙️ Écoute…";
-     rec.onresult=e=>{$("messageInput").value=e.results[0][0].transcript;send();};
-     rec.onerror=()=>{ $("voiceNote").textContent="La reconnaissance vocale n’a pas pu démarrer. Vérifie l’autorisation du micro ou écris ton message."; };
-     rec.onend=()=>{$("micBtn").textContent="🎙️ Parler";};
-     try { rec.start(); } catch { $("micBtn").textContent="🎙️ Parler"; }
-   });
- } else {
-   $("micBtn").addEventListener("click",()=>{ $("voiceNote").textContent="La reconnaissance vocale n’est pas prise en charge dans ce navigateur. Tu peux toujours écrire tes messages et écouter les réponses si la synthèse vocale est disponible."; });
- }
- renderMemories();
- if (!("speechSynthesis" in window)) $("voiceNote").textContent += " La synthèse vocale n’est pas disponible dans ce navigateur.";
+let prefs = readStore(STORE.prefs,{
+  tone:"casual",energy:70,nickname:"",speakReplies:true
+});
+let memories = readStore(STORE.memories,[]);
+if (!Array.isArray(memories)) memories = [];
+
+$("tone").value = prefs.tone || "casual";
+$("energy").value = Number(prefs.energy ?? 70);
+$("energyValue").textContent = $("energy").value + " %";
+$("nickname").value = prefs.nickname || "";
+$("speakReplies").checked = prefs.speakReplies !== false;
+
+function setStatus(text,kind){
+  const node = $("status");
+  node.textContent = text;
+  node.className = "status" + (kind ? " " + kind : "");
+}
+function addMessage(text,who){
+  const node = document.createElement("div");
+  node.className = "msg " + who;
+  node.textContent = String(text);
+  $("messages").appendChild(node);
+  $("messages").scrollTop = $("messages").scrollHeight;
+}
+function speak(text){
+  if (!voiceOn || !$("speakReplies").checked || !("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "fr-FR";
+  utterance.rate = 0.98;
+  window.speechSynthesis.speak(utterance);
+}
+
+async function checkServer(){
+  setStatus("● Vérification…","");
+  try {
+    const response = await fetch(API + "/",{
+      method:"GET",
+      cache:"no-store",
+      signal:AbortSignal.timeout(12000)
+    });
+    if (!response.ok) throw new Error("HTTP " + response.status);
+    const text = await response.text();
+    if (!text.includes("IZZY AI server is running!")) {
+      throw new Error("Réponse serveur inattendue");
+    }
+    serverOnline = true;
+    setStatus("● Serveur connecté","good");
+    $("conversationLabel").textContent = "Serveur disponible";
+  } catch (error) {
+    serverOnline = false;
+    setStatus("● Connexion à vérifier","bad");
+    $("conversationLabel").textContent = "Serveur inaccessible depuis le site";
+    console.error("Test de connexion IZZY AI :",error);
+  }
+}
+
+async function send(){
+  if (sending) return;
+  const raw = $("messageInput").value.trim();
+  if (!raw) return;
+
+  addMessage(raw,"user");
+  $("messageInput").value = "";
+  sending = true;
+  $("sendBtn").disabled = true;
+  $("conversationLabel").textContent = "IZZY AI réfléchit…";
+
+  try {
+    const response = await fetch(API + "/chat",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        message:raw,
+        conversationId:getConversationId()
+      }),
+      signal:AbortSignal.timeout(60000)
+    });
+
+    const contentType = response.headers.get("content-type") || "";
+    let data;
+    if (contentType.includes("application/json")) {
+      data = await response.json();
+    } else {
+      const bodyText = await response.text();
+      throw new Error("Le serveur a renvoyé une réponse inattendue (HTTP " + response.status + "). " + bodyText.slice(0,160));
+    }
+
+    if (!response.ok) {
+      throw new Error(data.error || "Erreur HTTP " + response.status);
+    }
+    if (typeof data.reply !== "string" || !data.reply.trim()) {
+      throw new Error("Le serveur n’a pas renvoyé de réponse valide.");
+    }
+
+    addMessage(data.reply,"ai");
+    $("conversationLabel").textContent = "Connecté";
+    setStatus("● Serveur connecté","good");
+    speak(data.reply);
+  } catch (error) {
+    console.error("Erreur IZZY AI :",error);
+    const reason = error.name === "TimeoutError"
+      ? "Le serveur met trop de temps à répondre. Réessaie dans un instant."
+      : error.message && error.message.startsWith("Erreur HTTP")
+        ? error.message
+        : error.message && !error.message.includes("Failed to fetch")
+          ? error.message
+          : "Impossible de joindre le serveur. Vérifie la configuration CORS et le service Render.";
+    addMessage("Erreur : " + reason,"ai");
+    $("conversationLabel").textContent = "Échec de la requête";
+    setStatus("● Connexion à vérifier","bad");
+  } finally {
+    sending = false;
+    $("sendBtn").disabled = false;
+  }
+}
+
+$("sendBtn").addEventListener("click",send);
+$("messageInput").addEventListener("keydown",event=>{
+  if(event.key === "Enter" && !event.shiftKey){
+    event.preventDefault();
+    send();
+  }
+});
+$("voiceBtn").addEventListener("click",()=>{
+  voiceOn = !voiceOn;
+  $("voiceBtn").textContent = voiceOn ? "🔊 Voix : activée" : "🔇 Voix : coupée";
+  if(!voiceOn && "speechSynthesis" in window) window.speechSynthesis.cancel();
+});
+$("stopBtn").addEventListener("click",()=>{
+  if("speechSynthesis" in window) window.speechSynthesis.cancel();
+});
+$("clearChatBtn").addEventListener("click",()=>{
+  $("messages").replaceChildren();
+  addMessage("Conversation effacée à l’écran. Tu peux continuer à discuter.","ai");
+});
+
+$("energy").addEventListener("input",()=>{
+  $("energyValue").textContent = $("energy").value + " %";
+});
+$("savePersonality").addEventListener("click",()=>{
+  prefs = {
+    tone:$("tone").value,
+    energy:Number($("energy").value),
+    nickname:$("nickname").value.trim(),
+    speakReplies:$("speakReplies").checked
+  };
+  const ok = writeStore(STORE.prefs,prefs);
+  addMessage(ok ? "Réglages enregistrés sur cet appareil." : "Impossible d’enregistrer les réglages dans ce navigateur.","ai");
+});
+
+function renderMemories(){
+  const root = $("memoryList");
+  root.replaceChildren();
+  if(!memories.length){
+    const p = document.createElement("p");
+    p.className = "sub";
+    p.textContent = "Aucun souvenir enregistré.";
+    root.appendChild(p);
+    return;
+  }
+  memories.forEach((memory,index)=>{
+    const row = document.createElement("div");
+    row.className = "memory";
+    const span = document.createElement("span");
+    span.textContent = memory;
+    const button = document.createElement("button");
+    button.textContent = "Supprimer";
+    button.addEventListener("click",()=>{
+      memories.splice(index,1);
+      writeStore(STORE.memories,memories);
+      renderMemories();
+    });
+    row.append(span,button);
+    root.appendChild(row);
+  });
+}
+function addMemory(){
+  const value = $("memoryInput").value.trim();
+  if(!value) return;
+  if(memories.length >= 50){
+    alert("Limite de 50 souvenirs.");
+    return;
+  }
+  memories.push(value);
+  if(!writeStore(STORE.memories,memories)){
+    memories.pop();
+    alert("Le navigateur n’a pas permis d’enregistrer ce souvenir.");
+    return;
+  }
+  $("memoryInput").value = "";
+  renderMemories();
+}
+$("addMemory").addEventListener("click",addMemory);
+$("memoryInput").addEventListener("keydown",event=>{
+  if(event.key === "Enter") addMemory();
+});
+$("deleteMemory").addEventListener("click",()=>{
+  if(confirm("Effacer tous les souvenirs enregistrés sur cet appareil ?")){
+    memories = [];
+    writeStore(STORE.memories,memories);
+    renderMemories();
+  }
+});
+$("exportMemory").addEventListener("click",()=>{
+  const blob = new Blob(
+    [JSON.stringify({exportedAt:new Date().toISOString(),memories},null,2)],
+    {type:"application/json"}
+  );
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "izzy-ai-memoires.json";
+  link.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if(SpeechRecognition){
+  $("micBtn").addEventListener("click",()=>{
+    const recognition = new SpeechRecognition();
+    recognition.lang = "fr-FR";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    $("micBtn").textContent = "🎙️ Écoute…";
+    recognition.onresult = event=>{
+      $("messageInput").value = event.results[0][0].transcript;
+      send();
+    };
+    recognition.onerror = ()=>{
+      $("voiceNote").textContent = "Le micro n’a pas pu démarrer. Vérifie l’autorisation du navigateur ou écris ton message.";
+    };
+    recognition.onend = ()=>{
+      $("micBtn").textContent = "🎙️ Parler";
+    };
+    try { recognition.start(); }
+    catch {
+      $("micBtn").textContent = "🎙️ Parler";
+      $("voiceNote").textContent = "Impossible de démarrer la reconnaissance vocale.";
+    }
+  });
+} else {
+  $("micBtn").addEventListener("click",()=>{
+    $("voiceNote").textContent = "La reconnaissance vocale n’est pas disponible dans ce navigateur. Tu peux toujours écrire tes messages.";
+  });
+}
+
+renderMemories();
+if(!("speechSynthesis" in window)){
+  $("voiceNote").textContent += " La lecture vocale n’est pas disponible.";
+}
+checkServer();
 })();
 </script>
 </body>
