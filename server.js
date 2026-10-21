@@ -9,6 +9,8 @@ app.set("trust proxy", 1);
 app.use(express.json({ limit: "10kb" }));
 
 const allowedOrigin = process.env.ALLOWED_ORIGIN;
+const requests = new Map();
+const conversations = new Map();
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
@@ -16,25 +18,13 @@ app.use((req, res, next) => {
   if (origin && origin === allowedOrigin) {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Vary", "Origin");
-    res.setHeader(
-      "Access-Control-Allow-Methods",
-      "GET, POST, OPTIONS"
-    );
-    res.setHeader(
-      "Access-Control-Allow-Headers",
-      "Content-Type"
-    );
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   }
 
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
-
+  if (req.method === "OPTIONS") return res.sendStatus(204);
   next();
 });
-
-const requests = new Map();
-const conversations = new Map();
 
 app.get("/", (req, res) => {
   res.send("IZZY AI server is running!");
@@ -61,14 +51,20 @@ app.post("/chat", async (req, res) => {
   const conversationId = req.body?.conversationId;
 
   if (typeof message !== "string" || !message.trim()) {
-    return res.status(400).json({
-      error: "Écris un message."
-    });
+    return res.status(400).json({ error: "Écris un message." });
   }
 
   if (message.length > 4000) {
+    return res.status(400).json({ error: "Message trop long." });
+  }
+
+  if (
+    typeof conversationId !== "string" ||
+    conversationId.length < 1 ||
+    conversationId.length > 100
+  ) {
     return res.status(400).json({
-      error: "Message trop long."
+      error: "Identifiant de conversation invalide. Actualise la page et réessaie."
     });
   }
 
@@ -84,30 +80,18 @@ app.post("/chat", async (req, res) => {
       baseURL: "https://api.groq.com/openai/v1"
     });
 
+    const history = conversations.get(conversationId) || [];
+
     const response = await client.chat.completions.create({
       model: "openai/gpt-oss-120b",
-messages: [
-  {
-    role: "system",
-    content:
-      "Tu es IZZY AI, un assistant intelligent, naturel, amical et honnête. Réponds dans la langue de l'utilisateur. Comprends le contexte de ses messages précédents lorsqu'il est disponible. Donne des réponses utiles, précises et faciles à comprendre. Pour les questions complexes, explique les choses étape par étape. Évite les répétitions et les longues introductions inutiles. Si tu ne connais pas une information ou si tu ne peux pas vérifier un fait récent, dis-le honnêtement. Ne prétends jamais avoir effectué une recherche sur Internet ou une action que tu n'as pas réellement effectuée."
-  },
-  ...(conversations.get(conversationId) || []),
-  {
-    role: "user",
-    content: message.trim()
-  }
-],
-
+      messages: [
         {
           role: "system",
           content:
-            "Tu es IZZY AI, un assistant intelligent, naturel, amical et honnête. Réponds dans la langue de l’utilisateur. Comprends le contexte de ses messages précédents lorsqu’il est disponible. Donne des réponses utiles, précises et faciles à comprendre. Pour les questions complexes, explique les choses étape par étape. Évite les répétitions et les longues introductions inutiles. Si tu ne connais pas une information ou si tu ne peux pas vérifier un fait récent, dis-le honnêtement. Ne prétends jamais avoir effectué une recherche sur Internet ou une action que tu n’as pas réellement effectuée."
+            "Tu es IZZY AI, un assistant intelligent, naturel, amical et honnête. Réponds dans la langue de l'utilisateur. Utilise le contexte des messages précédents disponibles. Donne des réponses utiles, précises et faciles à comprendre. Explique les sujets complexes étape par étape. Évite les répétitions. Si tu ne connais pas une information ou ne peux pas vérifier un fait récent, dis-le honnêtement. Ne prétends jamais avoir effectué une recherche ou une action que tu n'as pas réellement effectuée."
         },
-        {
-          role: "user",
-          content: message.trim()
-        }
+        ...history,
+        { role: "user", content: message.trim() }
       ],
       max_tokens: 800
     });
@@ -120,19 +104,13 @@ messages: [
       });
     }
 
-if (
-  typeof conversationId === "string" &&
-  conversationId.length <= 100
-) {
-  const history = conversations.get(conversationId) || [];
+    const updatedHistory = [
+      ...history,
+      { role: "user", content: message.trim() },
+      { role: "assistant", content: reply }
+    ].slice(-20);
 
-  history.push(
-    { role: "user", content: message.trim() },
-    { role: "assistant", content: reply }
-  );
-
-  conversations.set(conversationId, history.slice(-20));
-}
+    conversations.set(conversationId, updatedHistory);
 
     return res.json({ reply });
   } catch (error) {
