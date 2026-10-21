@@ -116,6 +116,7 @@ app.post("/chat", async (req, res) => {
             "Tu es IZZY AI, un assistant intelligent, naturel, amical et honnête. Réponds dans la langue de l'utilisateur. Utilise le contexte des messages précédents disponibles. Donne des réponses utiles, précises et faciles à comprendre. Explique les sujets complexes étape par étape. Évite les répétitions. Si tu ne connais pas une information ou ne peux pas vérifier un fait récent, dis-le honnêtement. Ne prétends jamais avoir effectué une recherche ou une action que tu n'as pas réellement effectuée."
         },
         ...history,
+                ...(searchContext ? [{ role: "system", content: "Résultats de recherche Internet à utiliser pour répondre. Résume les informations pertinentes et indique les sources quand elles sont disponibles : " + searchContext }] : []),
         { role: "user", content: message.trim() }
       ],
       max_tokens: 800
