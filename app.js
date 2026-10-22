@@ -30,7 +30,69 @@ function inline(parent,text){const re=/(\[[^\]]+\]\(https?:\/\/[^\s)]+\)|`[^`\n]
 function renderAnswer(root,raw){root.replaceChildren();const lines=cleanText(raw).split('\n');let para=[],list=null,code=false,codeLines=[];const flushP=()=>{if(!para.length)return;const p=document.createElement('p');inline(p,para.join(' '));root.append(p);para=[]},flushL=()=>{if(list){root.append(list);list=null}},flushC=()=>{const pre=document.createElement('pre'),c=document.createElement('code');c.textContent=codeLines.join('\n');pre.append(c);root.append(pre);codeLines=[]};for(const line of lines){if(line.trim().startsWith('```')){flushP();flushL();if(code){flushC();code=false}else code=true;continue}if(code){codeLines.push(line);continue}if(!line.trim()){flushP();flushL();continue}const item=line.match(/^\s*(?:[-*•]\s+|\d+[.)]\s+)/);if(item){flushP();const tag=/^\s*\d+[.)]\s+/.test(line)?'ol':'ul';if(!list||list.tagName.toLowerCase()!==tag){flushL();list=document.createElement(tag)}const li=document.createElement('li');inline(li,line.replace(/^\s*(?:[-*•]|\d+[.)])\s+/,''));list.append(li);continue}flushL();const h=line.match(/^#{1,3}\s+(.+)$/);if(h){flushP();const el=document.createElement('h3');inline(el,h[1]);root.append(el);continue}if(/^>\s?/.test(line)){flushP();const q=document.createElement('blockquote');inline(q,line.replace(/^>\s?/,''));root.append(q);continue}if(/^---+$/.test(line.trim())){flushP();root.append(document.createElement('hr'));continue}para.push(line.trim())}if(code)flushC();flushP();flushL()}
 function addMessage(text,role,opts={}){const chat=currentChat();if(!chat)return null;const row=document.createElement('div');row.className='message-row '+role;const av=document.createElement('div');av.className='avatar';av.textContent=role==='ai'?'I':'T';const body=document.createElement('div');body.className='message-body';if(role==='ai')renderAnswer(body,text);else body.textContent=text;row.append(av,body);$('messages').append(row);if(role==='ai'&&opts.actions!==false){const acts=document.createElement('div');acts.className='message-actions';[['Copier','copy'],['Lire','read'],['Partager','share'],['Nouveau chat depuis ici','branch'],['Réessayer','retry']].forEach(([label,act])=>{const b=document.createElement('button');b.textContent=label;b.onclick=()=>messageAction(act,text);acts.append(b)});body.append(acts)}if(opts.store!==false){chat.messages.push({role,text:String(text),at:Date.now()});chat.updatedAt=Date.now();updateChatTitle(chat);saveChats();$('currentTitle').textContent=chat.title}if(role==='ai')lastAssistantMessage=text;$('messages').scrollTop=$('messages').scrollHeight;return row}
 function renderChat(){const root=$('messages');root.replaceChildren();const chat=currentChat();$('welcome').classList.toggle('hidden',!!chat?.messages?.length);if(!chat){const c={id:uid(),title:'Nouveau chat',updatedAt:Date.now(),messages:[]};chats.unshift(c);activeId=c.id;saveChats();return renderChat()}chat.messages.forEach(m=>addMessage(m.text,m.role,{store:false,actions:m.role==='ai'}));$('currentTitle').textContent=chat.title;root.scrollTop=root.scrollHeight}
-function speak(text){if(!voiceOn||!$('speakReplies').checked||!('speechSynthesis'in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(cleanText(text).replace(/https?:\/\/\S+/g,' lien web '));u.lang='fr-FR';u.rate=.98;speechSynthesis.speak(u)}
+function speak(text) {
+  if (
+    !voiceOn ||
+    !$('speakReplies').checked ||
+    !('speechSynthesis' in window)
+  ) return;
+
+  speechSynthesis.cancel();
+
+  const message = cleanText(text)
+    .replace(/https?:\/\/\S+/g, ' lien web ')
+    .trim();
+
+  if (!message) return;
+
+  // Détection approximative de la langue du texte
+  function detectLanguage(text) {
+    if (/[\u3040-\u30ff]/.test(text)) return 'ja';
+    if (/[\u4e00-\u9fff]/.test(text)) return 'zh';
+    if (/[\u0400-\u04FF]/.test(text)) return 'ru';
+    if (/[\u0600-\u06FF]/.test(text)) return 'ar';
+    if (/[\uAC00-\uD7AF]/.test(text)) return 'ko';
+
+    const lower = text.toLowerCase();
+
+    const frenchWords =
+      /\b(bonjour|salut|merci|avec|pour|mais|donc|parce que|comment|pourquoi|oui|non|je|tu|vous|nous|est|suis|ça|être|avoir)\b/;
+
+    const englishWords =
+      /\b(hello|hi|thanks|please|with|for|but|because|how|why|yes|no|the|you|your|are|is|what|when|where|can|will)\b/;
+
+    const fr = (lower.match(/\b(bonjour|salut|merci|avec|pour|mais|donc|comment|pourquoi|je|tu|vous|nous|être|avoir)\b/g) || []).length;
+    const en = (lower.match(/\b(hello|thanks|please|with|because|how|why|the|you|your|what|when|where|can|will)\b/g) || []).length;
+
+    if (fr > en || frenchWords.test(lower) && fr >= en) return 'fr';
+    if (en > fr || englishWords.test(lower)) return 'en';
+
+    return (navigator.language || 'fr-FR').split('-')[0].toLowerCase();
+  }
+
+  const language = detectLanguage(message);
+  const voices = speechSynthesis.getVoices();
+
+  const preferredVoice =
+    voices.find(v => v.lang.toLowerCase() === language) ||
+    voices.find(v => v.lang.toLowerCase().startsWith(language + '-'));
+
+  const utterance = new SpeechSynthesisUtterance(message);
+
+  utterance.lang = preferredVoice
+    ? preferredVoice.lang
+    : language === 'fr' ? 'fr-FR'
+    : language === 'en' ? 'en-US'
+    : language;
+
+  if (preferredVoice) utterance.voice = preferredVoice;
+
+  utterance.rate = 0.94;
+  utterance.pitch = 0.96;
+  utterance.volume = 1;
+
+  speechSynthesis.speak(utterance);
+}
 async function messageAction(action,text){if(action==='copy'){try{await navigator.clipboard.writeText(cleanText(text));toast('Réponse copiée')}catch{toast('Copie non disponible')}return}if(action==='read'){speak(text);return}if(action==='share'){try{if(navigator.share)await navigator.share({title:'Réponse IZZY AI',text:cleanText(text)});else{await navigator.clipboard.writeText(cleanText(text));toast('Texte copié')}}catch{}return}if(action==='retry'){const last=[...(currentChat()?.messages||[])].reverse().find(m=>m.role==='user');if(last){$('messageInput').value=last.text;await send(true)}return}if(action==='branch'){const old=[...(currentChat()?.messages||[])];newChat();old.slice(-4).forEach(m=>addMessage(m.text,m.role));const last=[...old].reverse().find(m=>m.role==='user');if(last){$('messageInput').value='Continue cette discussion à partir de ce contexte :\n'+last.text;$('messageInput').focus()}toast('Nouveau chat créé avec le contexte récent')}}
 function preferences(){return{tone:$('tone').value,energy:Number($('energy').value),nickname:$('nickname').value.trim().slice(0,32),speakReplies:$('speakReplies').checked,memories:memories.slice(0,50)}}
 function clearPhoto(){selectedImageData=null;$('attachImage').removeAttribute('src');$('attachPreview').classList.remove('visible');$('cameraInput').value='';$('galleryInput').value=''}
