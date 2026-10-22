@@ -22,7 +22,113 @@ function currentChat(){return chats.find(c=>c.id===activeId)||null}
 function newChat(){const c={id:uid(),title:'Nouveau chat',updatedAt:Date.now(),messages:[]};chats.unshift(c);activeId=c.id;save('chats',chats);localStorage.setItem(userKey('active'),activeId);renderHistory();showPanel('chat');renderChat();closeMenu();$('messageInput').focus()}
 function saveChats(){save('chats',chats);localStorage.setItem(userKey('active'),activeId);renderHistory()}
 function updateChatTitle(c){if(c&&c.title==='Nouveau chat'){const f=c.messages.find(m=>m.role==='user');if(f)c.title=f.text.replace(/\s+/g,' ').slice(0,42)+(f.text.length>42?'…':'')}}
-function renderHistory(){const root=$('historyList'),q=$('historySearch').value.trim().toLowerCase();root.replaceChildren();const list=[...chats].sort((a,b)=>b.updatedAt-a.updatedAt).filter(c=>(c.title||'').toLowerCase().includes(q)||c.messages.some(m=>(m.text||'').toLowerCase().includes(q)));if(!list.length){const p=document.createElement('p');p.className='small-note';p.style.padding='0 8px';p.textContent=q?'Aucun résultat.':'Tes conversations apparaîtront ici.';root.append(p);return}list.slice(0,50).forEach(c=>{const b=document.createElement('button');b.className='history-item'+(c.id===activeId?' active':'');const s=document.createElement('span');s.textContent=c.title||'Conversation';b.append(s);b.onclick=()=>{activeId=c.id;localStorage.setItem(userKey('active'),activeId);renderHistory();showPanel('chat');renderChat();closeMenu()};const d=document.createElement('button');d.className='del';d.textContent='×';d.setAttribute('aria-label','Supprimer cette conversation');d.onclick=e=>{e.stopPropagation();if(confirm('Supprimer cette conversation de cet appareil ?')){chats=chats.filter(x=>x.id!==c.id);if(activeId===c.id)activeId='';saveChats();if(!activeId&&chats.length)activeId=chats[0].id;if(!activeId)newChat();else{localStorage.setItem(userKey('active'),activeId);renderHistory();renderChat()}}};b.append(d);root.append(b)})}
+
+function renderHistory(){
+  const root=$('historyList');
+  const q=$('historySearch').value.trim().toLowerCase();
+  root.replaceChildren();
+
+  const list=[...chats]
+    .sort((a,b)=>b.updatedAt-a.updatedAt)
+    .map(c=>{
+      const match=(c.messages||[]).find(m=>
+        (m.text||'').toLowerCase().includes(q)
+      );
+
+      return {
+        chat:c,
+        match,
+        titleMatch:(c.title||'').toLowerCase().includes(q)
+      };
+    })
+    .filter(x=>!q||x.titleMatch||x.match);
+
+  if(!list.length){
+    const p=document.createElement('p');
+    p.className='small-note';
+    p.style.padding='0 8px';
+    p.textContent=q
+      ?'Aucun résultat. Essaie un autre mot.'
+      :'Tes conversations apparaîtront ici.';
+    root.append(p);
+    return;
+  }
+
+  list.slice(0,50).forEach(({chat:c,match,titleMatch})=>{
+    const b=document.createElement('button');
+    b.className='history-item'+(c.id===activeId?' active':'');
+    b.type='button';
+
+    const info=document.createElement('span');
+    info.style.display='flex';
+    info.style.flexDirection='column';
+    info.style.minWidth='0';
+    info.style.gap='4px';
+
+    const title=document.createElement('span');
+    title.textContent=c.title||'Conversation';
+    info.append(title);
+
+    if(q&&match){
+      const preview=document.createElement('span');
+      preview.className='small-note';
+      preview.style.fontSize='12px';
+      preview.style.whiteSpace='nowrap';
+      preview.style.overflow='hidden';
+      preview.style.textOverflow='ellipsis';
+      preview.textContent=(match.role==='user'?'Toi : ':'IZZY : ')+match.text;
+      info.append(preview);
+    }else if(q&&titleMatch){
+      const preview=document.createElement('span');
+      preview.className='small-note';
+      preview.style.fontSize='12px';
+      preview.textContent='Correspondance dans le titre';
+      info.append(preview);
+    }
+
+    b.append(info);
+
+    b.onclick=()=>{
+      activeId=c.id;
+      localStorage.setItem(userKey('active'),activeId);
+      renderHistory();
+      showPanel('chat');
+      renderChat();
+      closeMenu();
+    };
+
+    const d=document.createElement('button');
+    d.className='del';
+    d.type='button';
+    d.textContent='×';
+    d.setAttribute('aria-label','Supprimer cette conversation');
+
+    d.onclick=e=>{
+      e.stopPropagation();
+
+      if(confirm('Supprimer cette conversation de cet appareil ?')){
+        chats=chats.filter(x=>x.id!==c.id);
+
+        if(activeId===c.id)activeId='';
+
+        saveChats();
+
+        if(!activeId&&chats.length)activeId=chats[0].id;
+
+        if(!activeId)newChat();
+        else{
+          localStorage.setItem(userKey('active'),activeId);
+          renderHistory();
+          renderChat();
+        }
+      }
+    };
+
+    b.append(d);
+    root.append(b);
+  });
+}
+
 function showPanel(name){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('[data-panel]').forEach(b=>b.classList.toggle('active',b.dataset.panel===name));const panel=$(name==='chat'?'chatPanel':name+'Panel');if(panel)panel.classList.add('active');$('currentTitle').textContent=name==='chat'?(currentChat()?.title||'Nouveau chat'):({projects:'Projets',tasks:'Tâches',settings:'Paramètres',memories:'Ma mémoire',admin:'Administration'}[name]||'IZZY AI');if(name==='projects')renderProjects();if(name==='tasks')renderTasks();if(name==='memories')renderMemories();if(name==='admin')refreshAdmin();closeMenu()}
 function closeMenu(){$('sidebar').classList.remove('open');$('overlay').classList.remove('show')}
 function cleanText(src){return String(src??'').replace(/\r/g,'').replace(/\\\[|\\\]/g,'').replace(/\\\(|\\\)/g,'').replace(/\\(?:text|mathrm|mathbf)\{([^{}]*)\}/g,'$1').replace(/\\(?:times|cdot)/g,' × ').replace(/\\(?:div)/g,' ÷ ').replace(/\\(?:leq|le)/g,'≤').replace(/\\(?:geq|ge)/g,'≥').replace(/\\neq/g,'≠').replace(/\\approx/g,'≈').replace(/\\rightarrow|\\Longrightarrow|\\to/g,' → ').replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g,'($1)/($2)').replace(/\$\$([\s\S]*?)\$\$/g,'$1').replace(/\$([^$\n]+)\$/g,'$1').replace(/\\begin\{[^}]+\}|\\end\{[^}]+\}/g,'').replace(/\\[,;!]/g,' ').replace(/\\[a-zA-Z]+/g,'').replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim()}
