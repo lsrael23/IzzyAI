@@ -149,6 +149,7 @@ $('webBtn').onclick=()=>{webSearch=!webSearch;$('webBtn').classList.toggle('acti
 $('voiceBtn').onclick=()=>{voiceOn=!voiceOn;$('voiceBtn').textContent=voiceOn?'■ Voix activée':'■ Voix coupée';if(!voiceOn&&'speechSynthesis'in window)speechSynthesis.cancel()};
 $('stopBtn').onclick=()=>{if('speechSynthesis'in window)speechSynthesis.cancel()};
 $('newChatBtn').onclick=newChat;
+$('temporaryChatBtn').onclick=toggleTemporaryChat;
 $('topNewChat').onclick=newChat;
 $('clearChatBtn').onclick=()=>{const c=currentChat();if(!c||!c.messages.length)return toast('Cette conversation est déjà vide');if(confirm('Effacer les messages de cette conversation ?')){c.messages=[];c.title='Nouveau chat';c.updatedAt=Date.now();saveChats();renderChat();toast('Conversation effacée')}};
 document.querySelectorAll('[data-panel]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.panel==='admin'&&!isAdmin)return toast('Accès administrateur refusé');showPanel(b.dataset.panel)}));
