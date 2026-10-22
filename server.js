@@ -333,6 +333,14 @@ app.get("/admin/me", requireAuth, (req, res) => {
   res.json({ authenticated: true, isAdmin: Boolean(ADMIN_USER_ID && req.user.id === ADMIN_USER_ID) });
 });
 
+async function requireAdmin(req, res, next) {
+  if (!ADMIN_USER_ID || req.user?.id !== ADMIN_USER_ID) {
+    return res.status(403).json({ error: "Accès réservé à l’administrateur." });
+  }
+  return next();
+}
+
+
 app.post("/chat", requireAuth, async (req, res) => {
   if (!checkRateLimit(req, res)) return;
   const { message, conversationId, preferences, webSearch: forceWebSearch } = req.body || {};
