@@ -1,4 +1,4 @@
-fimport express from "express";
+import express from "express";
 import OpenAI from "openai";
 import path from "node:path";
 
