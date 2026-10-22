@@ -340,6 +340,64 @@ async function requireAdmin(req, res, next) {
   return next();
 }
 
+app.get("/admin/users", requireAuth, requireAdmin, async (req, res) => {
+  res.set("Cache-Control", "no-store");
+
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!SUPABASE_URL || !serviceRoleKey) {
+    return res.status(503).json({
+      error: "Configuration administrateur Supabase incomplète."
+    });
+  }
+
+  try {
+    const response = await fetch(
+      `${SUPABASE_URL}/auth/v1/admin/users?page=1&per_page=50`,
+      {
+        headers: {
+          apikey: serviceRoleKey,
+          Authorization: `Bearer ${serviceRoleKey}`
+        },
+        signal: AbortSignal.timeout(15000)
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Erreur de récupération des comptes :", response.status);
+      return res.status(502).json({
+        error: "Impossible de récupérer les comptes utilisateurs."
+      });
+    }
+
+    const data = await response.json();
+
+    const users = (Array.isArray(data.users) ? data.users : []).map(user => ({
+      id: user.id,
+      email: user.email || null,
+      createdAt: user.created_at || null,
+      lastSignInAt: user.last_sign_in_at || null,
+      emailConfirmed: Boolean(user.email_confirmed_at),
+      bannedUntil: user.banned_until || null
+    }));
+
+    return res.json({ users, count: users.length });
+  } catch (error) {
+    console.error("Erreur administrateur :", error.message);
+    return res.status(503).json({
+      error: "Service temporairement indisponible."
+    });
+  }
+});
+
+
+async function requireAdmin(req, res, next) {
+  if (!ADMIN_USER_ID || req.user?.id !== ADMIN_USER_ID) {
+    return res.status(403).json({ error: "Accès réservé à l’administrateur." });
+  }
+  return next();
+}
+
 
 app.post("/chat", requireAuth, async (req, res) => {
   if (!checkRateLimit(req, res)) return;
