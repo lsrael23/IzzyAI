@@ -8,7 +8,11 @@ const port = process.env.PORT || 3000;
 app.set("trust proxy", 1);
 app.use(express.json({ limit: "8mb" }));
 
-const allowedOrigin = process.env.ALLOWED_ORIGIN;
+const allowedOrigin = process.env.ALLOWED_ORIGIN || "https://izzyai.onrender.com";
+const SUPABASE_URL = (process.env.SUPABASE_URL || "").replace(/\/+$/, "");
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "";
+const ADMIN_USER_ID = process.env.ADMIN_USER_ID || "";
+
 const TEXT_MODEL =
   process.env.GROQ_TEXT_MODEL || "openai/gpt-oss-120b";
 const VISION_MODEL =
@@ -25,11 +29,11 @@ const CONVERSATION_TTL = 6 * 60 * 60 * 1000;
 const RATE_LIMIT = 10;
 const RATE_WINDOW = 60 * 1000;
 
-// CORS : autorise uniquement le site configuré sur Render.
+// CORS : autorise le site et le jeton de connexion Supabase.
 app.use((req, res, next) => {
   const origin = req.headers.origin;
 
-  if (origin && allowedOrigin && origin === allowedOrigin) {
+  if (origin && origin === allowedOrigin) {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Vary", "Origin");
     res.setHeader(
@@ -38,7 +42,7 @@ app.use((req, res, next) => {
     );
     res.setHeader(
       "Access-Control-Allow-Headers",
-      "Content-Type"
+      "Content-Type, Authorization, apikey"
     );
   }
 
@@ -50,11 +54,7 @@ app.use((req, res, next) => {
     return res.sendStatus(204);
   }
 
-  if (
-    origin &&
-    allowedOrigin &&
-    origin !== allowedOrigin
-  ) {
+  if (origin && origin !== allowedOrigin) {
     return res.status(403).json({
       error: "Origine non autorisée."
     });
@@ -71,9 +71,69 @@ app.get("/", (req, res) => {
 app.get("/health", (req, res) => {
   res.json({
     status: "ok",
-    service: "IZZY AI"
+    service: "IZZY AI",
+    supabaseConfigured: Boolean(SUPABASE_URL && SUPABASE_ANON_KEY),
+    aiConfigured: Boolean(process.env.GROQ_API_KEY)
   });
 });
+
+// Vérification obligatoire du compte Supabase.
+async function requireAuth(req, res, next) {
+  try {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      return res.status(503).json({
+        error: "La configuration Supabase du serveur est incomplète."
+      });
+    }
+
+    const authorization = req.headers.authorization || "";
+    const match = authorization.match(/^Bearer\s+(.+)$/i);
+
+    if (!match) {
+      return res.status(401).json({
+        error: "Connecte-toi à ton compte pour utiliser IZZY AI."
+      });
+    }
+
+    const accessToken = match[1];
+
+    const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method: "GET",
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${accessToken}`
+      },
+      signal: AbortSignal.timeout(15000)
+    });
+
+    if (!response.ok) {
+      return res.status(401).json({
+        error: "Session invalide ou expirée. Reconnecte-toi."
+      });
+    }
+
+    const user = await response.json();
+
+    if (!user || typeof user.id !== "string") {
+      return res.status(401).json({
+        error: "Impossible de vérifier ton compte."
+      });
+    }
+
+    req.user = {
+      id: user.id,
+      email: user.email || null
+    };
+
+    next();
+  } catch (error) {
+    console.error("Vérification Supabase :", error.message);
+
+    return res.status(503).json({
+      error: "La vérification du compte est temporairement indisponible."
+    });
+  }
+}
 
 // Limitation des demandes.
 function checkRateLimit(req, res) {
@@ -361,23 +421,30 @@ async function searchWeb(message) {
   }
 }
 
-// Historique en mémoire du serveur.
-function getHistory(conversationId) {
-  const entry = conversations.get(conversationId);
+// Historique isolé par utilisateur Supabase.
+function conversationKey(userId, conversationId) {
+  return `${userId}:${conversationId}`;
+}
+
+function getHistory(userId, conversationId) {
+  const key = conversationKey(userId, conversationId);
+  const entry = conversations.get(key);
 
   if (!entry) return [];
 
   if (Date.now() - entry.updatedAt > CONVERSATION_TTL) {
-    conversations.delete(conversationId);
+    conversations.delete(key);
     return [];
   }
 
   return entry.messages;
 }
 
-function saveHistory(conversationId, messages) {
+function saveHistory(userId, conversationId, messages) {
+  const key = conversationKey(userId, conversationId);
+
   if (
-    !conversations.has(conversationId) &&
+    !conversations.has(key) &&
     conversations.size >= MAX_CONVERSATIONS
   ) {
     const oldestId = conversations.keys().next().value;
@@ -387,7 +454,7 @@ function saveHistory(conversationId, messages) {
     }
   }
 
-  conversations.set(conversationId, {
+  conversations.set(key, {
     messages: messages.slice(-MAX_HISTORY),
     updatedAt: Date.now()
   });
@@ -455,7 +522,7 @@ function buildMessages(history, message, preferences, webData = null) {
   return messages;
 }
 
-// Ajout des sources en texte clair pour éviter les marqueurs Markdown bruts.
+// Ajout des sources en texte clair.
 function appendSources(reply, search) {
   let result = reply.trim();
 
@@ -533,8 +600,18 @@ function handleAIError(res, error, action) {
   });
 }
 
-// CHAT TEXTE.
-app.post("/chat", async (req, res) => {
+// Vérification de l'accès administrateur côté serveur.
+app.get("/admin/me", requireAuth, (req, res) => {
+  res.json({
+    authenticated: true,
+    isAdmin: Boolean(
+      ADMIN_USER_ID && req.user.id === ADMIN_USER_ID
+    )
+  });
+});
+
+// CHAT TEXTE : compte connecté obligatoire.
+app.post("/chat", requireAuth, async (req, res) => {
   if (!checkRateLimit(req, res)) return;
 
   const message = req.body?.message;
@@ -556,7 +633,7 @@ app.post("/chat", async (req, res) => {
 
   try {
     const client = getClient();
-    const history = getHistory(conversationId);
+    const history = getHistory(req.user.id, conversationId);
     const shouldSearch =
       forceWebSearch || needsWebSearch(message.trim());
 
@@ -592,7 +669,7 @@ app.post("/chat", async (req, res) => {
       ? appendSources(reply, search)
       : reply.trim();
 
-    saveHistory(conversationId, [
+    saveHistory(req.user.id, conversationId, [
       ...history,
       {
         role: "user",
@@ -605,15 +682,16 @@ app.post("/chat", async (req, res) => {
     ]);
 
     return res.json({
-      reply: finalReply
+      reply: finalReply,
+      conversationId
     });
   } catch (error) {
     return handleAIError(res, error, "/chat");
   }
 });
 
-// ANALYSE DE PHOTO.
-app.post("/vision", async (req, res) => {
+// ANALYSE DE PHOTO : compte connecté obligatoire.
+app.post("/vision", requireAuth, async (req, res) => {
   if (!checkRateLimit(req, res)) return;
 
   const message =
@@ -651,7 +729,7 @@ app.post("/vision", async (req, res) => {
 
   try {
     const client = getClient();
-    const history = getHistory(conversationId);
+    const history = getHistory(req.user.id, conversationId);
 
     const messages = buildMessages(
       history,
@@ -706,7 +784,7 @@ app.post("/vision", async (req, res) => {
     const finalReply = reply.trim();
 
     // Seul un résumé textuel est conservé, jamais la photo.
-    saveHistory(conversationId, [
+    saveHistory(req.user.id, conversationId, [
       ...history,
       {
         role: "user",
@@ -719,7 +797,8 @@ app.post("/vision", async (req, res) => {
     ]);
 
     return res.json({
-      reply: finalReply
+      reply: finalReply,
+      conversationId
     });
   } catch (error) {
     return handleAIError(res, error, "/vision");
@@ -745,4 +824,8 @@ setInterval(() => {
 
 app.listen(port, () => {
   console.log(`IZZY AI server running on port ${port}`);
+  console.log(
+    `Supabase configured: ${Boolean(SUPABASE_URL && SUPABASE_ANON_KEY)}`
+  );
+  console.log(`Groq configured: ${Boolean(process.env.GROQ_API_KEY)}`);
 });
