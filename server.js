@@ -140,12 +140,80 @@ function sanitizeValue(value, depth = 0) {
   return undefined;
 }
 
+
 function getPersonalizationContext(preferences) {
-  if (!preferences || typeof preferences !== "object" || Array.isArray(preferences)) return null;
+  if (
+    !preferences ||
+    typeof preferences !== "object" ||
+    Array.isArray(preferences)
+  ) {
+    return null;
+  }
+
   try {
-    const serialized = JSON.stringify(sanitizeValue(preferences));
-    return serialized && serialized.length <= MAX_PREFERENCES_LENGTH ? serialized : null;
-  } catch { return null; }
+    const toneLabels = {
+      casual: "Familier et naturel",
+      calm: "Calme et posé",
+      funny: "Drôle et expressif",
+      direct: "Direct et efficace"
+    };
+
+    const parts = [];
+
+    const nickname =
+      typeof preferences.nickname === "string"
+        ? preferences.nickname.trim().slice(0, 32)
+        : "";
+
+    if (nickname) {
+      parts.push(
+        `Surnom préféré : ${JSON.stringify(nickname)}. Utilise-le naturellement de temps en temps, sans le répéter à chaque réponse.`
+      );
+    }
+
+    const tone = preferences.tone;
+
+    if (typeof tone === "string" && toneLabels[tone]) {
+      parts.push(`Style préféré : ${toneLabels[tone]}.`);
+    }
+
+    const energy = Number(preferences.energy);
+
+    if (Number.isFinite(energy)) {
+      parts.push(
+        `Niveau d'énergie préféré : ${Math.max(0, Math.min(100, energy))}/100.`
+      );
+    }
+
+    if (Array.isArray(preferences.memories)) {
+      const memories = preferences.memories
+        .filter(item => typeof item === "string")
+        .map(item => item.trim())
+        .filter(Boolean)
+        .slice(0, 50);
+
+      if (memories.length) {
+        parts.push(
+          "Souvenirs fournis par l'utilisateur :\n" +
+          memories.map((item, index) =>
+            `${index + 1}. ${JSON.stringify(item.slice(0, 500))}`
+          ).join("\n")
+        );
+      }
+    }
+
+    if (typeof preferences.speakReplies === "boolean") {
+      parts.push(
+        `Lecture vocale activée dans les préférences : ${preferences.speakReplies ? "oui" : "non"}.`
+      );
+    }
+
+    if (!parts.length) return null;
+
+    return parts.join("\n\n").slice(0, MAX_PREFERENCES_LENGTH);
+  } catch {
+    return null;
+  }
 }
 
 function systemPrompt(preferences = {}) {
