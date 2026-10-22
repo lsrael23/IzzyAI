@@ -101,7 +101,179 @@ $('cameraBtn').onclick=()=>$('cameraInput').click();$('galleryBtn').onclick=()=>
 async function authFetch(path,options={}){if(!session?.access_token)throw Error('Ta session a expiré. Reconnecte-toi.');const headers={...(options.headers||{}),Authorization:'Bearer '+session.access_token};return fetch(API+path,{...options,headers})}
 async function checkServer(){try{const r=await fetch(API+'/health',{cache:'no-store'});const d=await r.json();if(!r.ok||d.status!=='ok')throw Error();setStatus('● Serveur connecté','good')}catch{setStatus('● Serveur à vérifier','bad')}}
 async function checkAdmin(){isAdmin=false;try{const r=await authFetch('/admin/me',{cache:'no-store'});const d=await r.json();isAdmin=!!(r.ok&&d.isAdmin&&user&&user.id===ADMIN_USER_ID)}catch{}$('adminBtn').classList.toggle('hidden',!isAdmin);$('adminTag').classList.toggle('hidden',!isAdmin);if(!isAdmin&&$('adminPanel').classList.contains('active'))showPanel('chat')}
-async function refreshAdmin(){if(!isAdmin)return;const el=$('adminHealth');el.textContent='Vérification…';$('adminAccount').textContent=user?.email||user?.id||'';try{const r=await authFetch('/health',{cache:'no-store'});const d=await r.json();el.textContent=r.ok&&d.status==='ok'?'Serveur opérationnel • Supabase : '+(d.supabaseConfigured?'connecté':'non configuré')+' • IA : '+(d.aiConfigured?'configurée':'non configurée'):'État serveur à vérifier'}catch{el.textContent='Impossible de joindre le serveur.'}}
+
+async function refreshAdmin() {
+  if (!isAdmin || !user) {
+    toast('Accès administrateur refusé');
+    return;
+  }
+
+  const health = $('adminHealth');
+  const account = $('adminAccount');
+
+  health.textContent = 'Vérification du serveur…';
+  account.textContent = user.email || user.id;
+
+  // Créer la zone des comptes une seule fois.
+  let usersSection = $('adminUsersSection');
+
+  if (!usersSection) {
+    usersSection = document.createElement('div');
+    usersSection.id = 'adminUsersSection';
+    usersSection.className = 'field';
+    usersSection.style.marginTop = '24px';
+
+    const heading = document.createElement('h3');
+    heading.textContent = 'Comptes utilisateurs';
+
+    const description = document.createElement('p');
+    description.className = 'small-note';
+    description.textContent =
+      'Liste des comptes enregistrés sur IZZY AI.';
+
+    const count = document.createElement('p');
+    count.id = 'adminUsersCount';
+    count.className = 'small-note';
+
+    const list = document.createElement('div');
+    list.id = 'adminUsersList';
+    list.className = 'list-items';
+
+    usersSection.append(heading, description, count, list);
+    $('adminPanel').append(usersSection);
+  }
+
+  const list = $('adminUsersList');
+  const count = $('adminUsersCount');
+
+  list.replaceChildren();
+  count.textContent = 'Chargement des comptes…';
+
+  try {
+    // Vérifier l'état du serveur.
+    const healthResponse = await authFetch('/health', {
+      cache: 'no-store'
+    });
+
+    const healthData = await healthResponse.json();
+
+    health.textContent =
+      healthResponse.ok && healthData.status === 'ok'
+        ? 'Serveur opérationnel • Supabase : ' +
+          (healthData.supabaseConfigured ? 'connecté' : 'non configuré') +
+          ' • IA : ' +
+          (healthData.aiConfigured ? 'configurée' : 'non configurée')
+        : 'État du serveur à vérifier';
+
+    // Demander les comptes au serveur protégé.
+    const response = await authFetch('/admin/users', {
+      cache: 'no-store'
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || 'Impossible de récupérer les comptes (HTTP ' +
+        response.status + ').'
+      );
+    }
+
+    if (!Array.isArray(data.users)) {
+      throw new Error('Format de réponse des comptes invalide.');
+    }
+
+    count.textContent =
+      data.users.length + ' compte' +
+      (data.users.length > 1 ? 's' : '') + ' trouvé' +
+      (data.users.length > 1 ? 's' : '');
+
+    if (data.users.length === 0) {
+      list.textContent = 'Aucun compte utilisateur trouvé.';
+      return;
+    }
+
+    data.users.forEach((accountData, index) => {
+      const card = document.createElement('div');
+      card.className = 'list-item';
+      card.style.display = 'block';
+      card.style.padding = '14px';
+      card.style.marginBottom = '10px';
+
+      const email = document.createElement('div');
+      email.style.fontWeight = '600';
+      email.style.overflowWrap = 'anywhere';
+      email.textContent = accountData.email || 'E-mail non renseigné';
+
+      const created = document.createElement('p');
+      created.className = 'small-note';
+
+      const createdDate = accountData.createdAt
+        ? new Date(accountData.createdAt)
+        : null;
+
+      created.textContent =
+        'Création : ' +
+        (createdDate && !Number.isNaN(createdDate.getTime())
+          ? createdDate.toLocaleString('fr-FR')
+          : 'Date inconnue');
+
+      const lastLogin = document.createElement('p');
+      lastLogin.className = 'small-note';
+
+      const loginDate = accountData.lastSignInAt
+        ? new Date(accountData.lastSignInAt)
+        : null;
+
+      lastLogin.textContent =
+        'Dernière connexion : ' +
+        (loginDate && !Number.isNaN(loginDate.getTime())
+          ? loginDate.toLocaleString('fr-FR')
+          : 'Aucune connexion enregistrée');
+
+      const status = document.createElement('p');
+      status.className = 'small-note';
+      status.textContent = accountData.emailConfirmed
+        ? 'E-mail confirmé'
+        : 'E-mail non confirmé';
+
+      const id = document.createElement('p');
+      id.className = 'small-note';
+      id.style.overflowWrap = 'anywhere';
+      id.textContent = 'ID : ' + (accountData.id || 'Inconnu');
+
+      if (accountData.id === ADMIN_USER_ID) {
+        const badge = document.createElement('span');
+        badge.textContent = 'Compte créateur';
+        badge.style.display = 'inline-block';
+        badge.style.marginTop = '8px';
+        badge.style.padding = '4px 9px';
+        badge.style.border = '1px solid #b99a52';
+        badge.style.borderRadius = '999px';
+        badge.style.color = '#e4c779';
+        badge.style.fontSize = '12px';
+        card.append(email, badge, created, lastLogin, status, id);
+      } else {
+        card.append(email, created, lastLogin, status, id);
+      }
+
+      list.append(card);
+    });
+
+  } catch (error) {
+    health.textContent = 'Serveur à vérifier';
+
+    count.textContent = 'Chargement impossible';
+
+    const message = document.createElement('p');
+    message.className = 'small-note';
+    message.textContent =
+      error.message || 'Une erreur est survenue.';
+
+    list.replaceChildren(message);
+  }
+}
+
 async function send(retry=false){if(sending)return;if(!session?.access_token)return toast('Connecte-toi pour envoyer un message');const input=$('messageInput'),raw=input.value.trim(),image=selectedImageData;if(!raw&&!image)return;const message=raw||'Analyse cette image et explique-moi ce que tu observes.';if(!retry){addMessage(message+(image?'\n[Photo jointe]':''),'user');lastUserMessage=message}input.value='';input.style.height='auto';$('welcome').classList.add('hidden');sending=true;$('sendBtn').disabled=true;$('typing').classList.remove('hidden');const pref=preferences();prefs=pref;save('prefs',{tone:pref.tone,energy:pref.energy,nickname:pref.nickname,speakReplies:pref.speakReplies});try{const endpoint=image?'/vision':'/chat',payload={message,conversationId:activeId,preferences:pref};if(image)payload.imageData=image;if(webSearch&&!image)payload.webSearch=true;const r=await authFetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout?AbortSignal.timeout(90000):undefined});const ct=r.headers.get('content-type')||'';const data=ct.includes('application/json')?await r.json():{error:(await r.text()).slice(0,180)};if(!r.ok)throw Error(data.error||'Erreur HTTP '+r.status);if(typeof data.reply!=='string'||!data.reply.trim())throw Error('Le serveur n’a pas renvoyé de réponse.');addMessage(data.reply,'ai');speak(data.reply);if(image)clearPhoto();setStatus('● Serveur connecté','good')}catch(e){addMessage('Je n’arrive pas à répondre pour le moment. '+(e.message&&!e.message.includes('Failed to fetch')?e.message:'Vérifie la connexion au serveur puis réessaie.'),'ai');setStatus('● Connexion à vérifier','bad')}finally{sending=false;$('sendBtn').disabled=false;$('typing').classList.add('hidden')}}
 $('sendBtn').onclick=()=>send();$('messageInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});$('messageInput').addEventListener('input',e=>{e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,160)+'px'});
 $('webBtn').onclick=()=>{webSearch=!webSearch;$('webBtn').classList.toggle('active',webSearch);$('webBtn').setAttribute('aria-pressed',String(webSearch));toast(webSearch?'Recherche web activée pour le prochain message':'Recherche web désactivée')};$('voiceBtn').onclick=()=>{voiceOn=!voiceOn;$('voiceBtn').textContent=voiceOn?'■ Voix activée':'■ Voix coupée';if(!voiceOn&&'speechSynthesis'in window)speechSynthesis.cancel()};$('stopBtn').onclick=()=>{if('speechSynthesis'in window)speechSynthesis.cancel()};$('newChatBtn').onclick=newChat;$('topNewChat').onclick=newChat;
