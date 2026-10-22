@@ -13,14 +13,28 @@ const K={prefs:'izzyAI.prefs.v1',memories:'izzyAI.memories.v1',chats:'izzyAI.cha
 const read=(k,d)=>{try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch{return d}},write=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch{return false}};
 const uid=()=>crypto?.randomUUID?.()||'izzy-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
 let session=null,user=null,isAdmin=false,authMode='login',recoveryMode=false,chats=[],projects=[],tasks=[],memories=[],activeId='',sending=false,selectedImageData=null,webSearch=false,voiceOn=true,lastUserMessage='',lastAssistantMessage='',toastTimer,prefs={tone:'casual',energy:70,nickname:'',speakReplies:true};
+let temporaryMode=false;
+let temporaryChat=null;
 function toast(t){const n=$('toast');n.textContent=t;n.classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>n.classList.add('hidden'),2400)}
 function setStatus(t,k=''){const n=$('status');n.textContent=t;n.className='status'+(k?' '+k:'')}
 function userKey(k){return 'izzyAI.user.'+(user?.id||'signedout')+'.'+k}
 function loadUserData(){prefs=read(userKey('prefs'),read(K.prefs,{tone:'casual',energy:70,nickname:'',speakReplies:true}));memories=read(userKey('memories'),read(K.memories,[]));chats=read(userKey('chats'),read(K.chats,[]));projects=read(userKey('projects'),read(K.projects,[]));tasks=read(userKey('tasks'),read(K.tasks,[]));if(!Array.isArray(chats))chats=[];if(!Array.isArray(projects))projects=[];if(!Array.isArray(tasks))tasks=[];if(!Array.isArray(memories))memories=[];memories=memories.filter(x=>typeof x==='string').slice(0,50);activeId=localStorage.getItem(userKey('active'))||''}
 function save(k,v){write(userKey(k),v)}
-function currentChat(){return chats.find(c=>c.id===activeId)||null}
+function currentChat(){
+  if(temporaryMode)return temporaryChat;
+  return chats.find(c=>c.id===activeId)||null;
+}
 function newChat(){const c={id:uid(),title:'Nouveau chat',updatedAt:Date.now(),messages:[]};chats.unshift(c);activeId=c.id;save('chats',chats);localStorage.setItem(userKey('active'),activeId);renderHistory();showPanel('chat');renderChat();closeMenu();$('messageInput').focus()}
-function saveChats(){save('chats',chats);localStorage.setItem(userKey('active'),activeId);renderHistory()}
+function saveChats(){
+  if(temporaryMode){
+    renderChat();
+    return;
+  }
+
+  save('chats',chats);
+  localStorage.setItem(userKey('active'),activeId);
+  renderHistory();
+}
 function updateChatTitle(c){if(c&&c.title==='Nouveau chat'){const f=c.messages.find(m=>m.role==='user');if(f)c.title=f.text.replace(/\s+/g,' ').slice(0,42)+(f.text.length>42?'…':'')}}
 
 function renderHistory(){
