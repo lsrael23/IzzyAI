@@ -108,7 +108,64 @@ $('webBtn').onclick=()=>{webSearch=!webSearch;$('webBtn').classList.toggle('acti
 $('clearChatBtn').onclick=()=>{const c=currentChat();if(!c||!c.messages.length)return toast('Cette conversation est déjà vide');if(confirm('Effacer les messages de cette conversation ?')){c.messages=[];c.title='Nouveau chat';c.updatedAt=Date.now();saveChats();renderChat();toast('Conversation effacée')}};
 document.querySelectorAll('[data-panel]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.panel==='admin'&&!isAdmin)return toast('Accès administrateur refusé');showPanel(b.dataset.panel)}));$('menuBtn').onclick=()=>{$('sidebar').classList.add('open');$('overlay').classList.add('show')};$('overlay').onclick=closeMenu;$('searchChatsBtn').onclick=()=>{$('historySearchWrap').classList.toggle('hidden');$('historySearch').focus();renderHistory()};$('historySearch').oninput=renderHistory;
 document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>{$('messageInput').value=b.dataset.prompt;send()}));
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;$('micBtn').onclick=()=>{if(!SR)return toast('La saisie vocale n’est pas disponible ici');const rec=new SR();rec.lang='fr-FR';rec.interimResults=false;rec.onresult=e=>{$('messageInput').value=e.results[0][0].transcript;send()};rec.onerror=()=>toast('Autorise le micro dans Safari');rec.start();toast('Je t’écoute…')};
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+$('micBtn').onclick = () => {
+  if (!SR) {
+    return toast('La saisie vocale n’est pas disponible ici');
+  }
+
+  const rec = new SR();
+  const browserLanguage = (navigator.language || 'fr-FR').toLowerCase();
+
+  // Utilise la langue du navigateur, avec le français comme solution de secours.
+  rec.lang = browserLanguage.startsWith('en')
+    ? 'en-US'
+    : browserLanguage.startsWith('es')
+      ? 'es-ES'
+      : browserLanguage.startsWith('pt')
+        ? 'pt-BR'
+        : browserLanguage.startsWith('de')
+          ? 'de-DE'
+          : browserLanguage.startsWith('it')
+            ? 'it-IT'
+            : 'fr-FR';
+
+  rec.interimResults = false;
+  rec.maxAlternatives = 1;
+
+  rec.onresult = event => {
+    const transcript = event.results?.[0]?.[0]?.transcript;
+    if (!transcript) {
+      toast('Je n’ai pas compris. Réessaie.');
+      return;
+    }
+
+    $('messageInput').value = transcript;
+    send();
+  };
+
+  rec.onerror = event => {
+    const errors = {
+      'not-allowed': 'Autorise le micro dans les réglages du navigateur.',
+      'no-speech': 'Je n’ai rien entendu. Réessaie.',
+      'network': 'La reconnaissance vocale nécessite une connexion réseau.',
+      'audio-capture': 'Aucun micro accessible.'
+    };
+
+    toast(errors[event.error] || 'La reconnaissance vocale a échoué.');
+  };
+
+  rec.onend = () => {
+    $('micBtn').classList.remove('active');
+  };
+
+  rec.start();
+  $('micBtn').classList.add('active');
+  toast('Je t’écoute…');
+};
+
 $('energy').oninput=()=>$('energyValue').textContent=$('energy').value+' %';$('savePersonality').onclick=()=>{const p=preferences();prefs=p;save('prefs',{tone:p.tone,energy:p.energy,nickname:p.nickname,speakReplies:p.speakReplies});$('profileName').textContent=p.nickname||user?.email||'IZZY AI';toast('Réglages enregistrés')};
 function renderMemories(){const root=$('memoryList');root.replaceChildren();if(!memories.length){root.textContent='Aucun souvenir pour le moment.';root.className='list-items small-note';return}root.className='list-items';memories.forEach((m,i)=>{const row=document.createElement('div');row.className='list-item';const s=document.createElement('span');s.textContent=m;const b=document.createElement('button');b.textContent='Supprimer';b.onclick=()=>{memories.splice(i,1);save('memories',memories);renderMemories()};row.append(s,b);root.append(row)})}
 function addMemory(){const v=$('memoryInput').value.trim();if(!v)return;if(memories.length>=50)return toast('Maximum 50 souvenirs');memories.push(v);save('memories',memories);$('memoryInput').value='';renderMemories();toast('Souvenir enregistré sur cet appareil')}
