@@ -28,7 +28,132 @@ function closeMenu(){$('sidebar').classList.remove('open');$('overlay').classLis
 function cleanText(src){return String(src??'').replace(/\r/g,'').replace(/\\\[|\\\]/g,'').replace(/\\\(|\\\)/g,'').replace(/\\(?:text|mathrm|mathbf)\{([^{}]*)\}/g,'$1').replace(/\\(?:times|cdot)/g,' × ').replace(/\\(?:div)/g,' ÷ ').replace(/\\(?:leq|le)/g,'≤').replace(/\\(?:geq|ge)/g,'≥').replace(/\\neq/g,'≠').replace(/\\approx/g,'≈').replace(/\\rightarrow|\\Longrightarrow|\\to/g,' → ').replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g,'($1)/($2)').replace(/\$\$([\s\S]*?)\$\$/g,'$1').replace(/\$([^$\n]+)\$/g,'$1').replace(/\\begin\{[^}]+\}|\\end\{[^}]+\}/g,'').replace(/\\[,;!]/g,' ').replace(/\\[a-zA-Z]+/g,'').replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim()}
 function inline(parent,text){const re=/(\[[^\]]+\]\(https?:\/\/[^\s)]+\)|`[^`\n]+`|\*\*[^*]+\*\*|__[^_]+__|\*[^*\n]+\*|_[^_\n]+_)/g;let pos=0,m;while((m=re.exec(text))){if(m.index>pos)parent.append(document.createTextNode(text.slice(pos,m.index)));const t=m[0];let el;if(t[0]==='['){const z=t.match(/^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/);if(z){el=document.createElement('a');el.textContent=z[1];el.href=z[2];el.target='_blank';el.rel='noopener noreferrer'}}else if(t[0]==='`'){el=document.createElement('code');el.textContent=t.slice(1,-1)}else if(t.startsWith('**')||t.startsWith('__')){el=document.createElement('strong');el.textContent=t.slice(2,-2)}else{el=document.createElement('em');el.textContent=t.slice(1,-1)}parent.append(el||document.createTextNode(t));pos=re.lastIndex}if(pos<text.length)parent.append(document.createTextNode(text.slice(pos)))}
 function renderAnswer(root,raw){root.replaceChildren();const lines=cleanText(raw).split('\n');let para=[],list=null,code=false,codeLines=[];const flushP=()=>{if(!para.length)return;const p=document.createElement('p');inline(p,para.join(' '));root.append(p);para=[]},flushL=()=>{if(list){root.append(list);list=null}},flushC=()=>{const pre=document.createElement('pre'),c=document.createElement('code');c.textContent=codeLines.join('\n');pre.append(c);root.append(pre);codeLines=[]};for(const line of lines){if(line.trim().startsWith('```')){flushP();flushL();if(code){flushC();code=false}else code=true;continue}if(code){codeLines.push(line);continue}if(!line.trim()){flushP();flushL();continue}const item=line.match(/^\s*(?:[-*•]\s+|\d+[.)]\s+)/);if(item){flushP();const tag=/^\s*\d+[.)]\s+/.test(line)?'ol':'ul';if(!list||list.tagName.toLowerCase()!==tag){flushL();list=document.createElement(tag)}const li=document.createElement('li');inline(li,line.replace(/^\s*(?:[-*•]|\d+[.)])\s+/,''));list.append(li);continue}flushL();const h=line.match(/^#{1,3}\s+(.+)$/);if(h){flushP();const el=document.createElement('h3');inline(el,h[1]);root.append(el);continue}if(/^>\s?/.test(line)){flushP();const q=document.createElement('blockquote');inline(q,line.replace(/^>\s?/,''));root.append(q);continue}if(/^---+$/.test(line.trim())){flushP();root.append(document.createElement('hr'));continue}para.push(line.trim())}if(code)flushC();flushP();flushL()}
-function addMessage(text,role,opts={}){const chat=currentChat();if(!chat)return null;const row=document.createElement('div');row.className='message-row '+role;const av=document.createElement('div');av.className='avatar';av.textContent=role==='ai'?'I':'T';const body=document.createElement('div');body.className='message-body';if(role==='ai')renderAnswer(body,text);else body.textContent=text;row.append(av,body);$('messages').append(row);if(role==='ai'&&opts.actions!==false){const acts=document.createElement('div');acts.className='message-actions';[['Copier','copy'],['Lire','read'],['Partager','share'],['Nouveau chat depuis ici','branch'],['Réessayer','retry']].forEach(([label,act])=>{const b=document.createElement('button');b.textContent=label;b.onclick=()=>messageAction(act,text);acts.append(b)});body.append(acts)}if(opts.store!==false){chat.messages.push({role,text:String(text),at:Date.now()});chat.updatedAt=Date.now();updateChatTitle(chat);saveChats();$('currentTitle').textContent=chat.title}if(role==='ai')lastAssistantMessage=text;$('messages').scrollTop=$('messages').scrollHeight;return row}
+
+function addMessage(text,role,opts={}){
+  const chat=currentChat();
+  if(!chat)return null;
+
+  const row=document.createElement('div');
+  row.className='message-row '+role;
+
+  const av=document.createElement('div');
+  av.className='avatar';
+  av.textContent=role==='ai'?'I':'T';
+
+  const body=document.createElement('div');
+  body.className='message-body';
+
+  if(role==='ai')renderAnswer(body,text);
+  else body.textContent=text;
+
+  const timestamp=document.createElement('div');
+  timestamp.className='message-timestamp';
+  const time=opts.at||Date.now();
+  timestamp.textContent=new Date(time).toLocaleTimeString('fr-FR',{
+    hour:'2-digit',
+    minute:'2-digit'
+  });
+  body.append(timestamp);
+
+  row.append(av,body);
+  $('messages').append(row);
+
+  if(role==='ai'&&opts.actions!==false){
+    const acts=document.createElement('div');
+    acts.className='message-actions';
+
+    [['Copier','copy'],['Lire','read'],['Partager','share'],
+     ['Nouveau chat depuis ici','branch'],['Réessayer','retry']
+    ].forEach(([label,act])=>{
+      const b=document.createElement('button');
+      b.type='button';
+      b.textContent=label;
+      b.onclick=()=>messageAction(act,text);
+      acts.append(b);
+    });
+
+    ['👍','👎'].forEach(value=>{
+      const b=document.createElement('button');
+      b.type='button';
+      b.textContent=value;
+      b.setAttribute('aria-label',value==='👍'?'Bonne réponse':'Mauvaise réponse');
+      b.onclick=()=>{
+        const selected=b.dataset.selected==='true';
+        acts.querySelectorAll('[aria-label="Bonne réponse"],[aria-label="Mauvaise réponse"]').forEach(btn=>{
+          btn.dataset.selected='false';
+          btn.style.opacity='0.65';
+        });
+        if(!selected){
+          b.dataset.selected='true';
+          b.style.opacity='1';
+          const current=currentChat();
+          if(current){
+            const message=[...current.messages].reverse().find(m=>m.role==='ai'&&m.text===String(text));
+            if(message){
+              message.feedback=value==='👍'?'positive':'negative';
+              saveChats();
+            }
+          }
+          toast(value==='👍'?'Merci pour ton avis !':'Avis enregistré.');
+        }
+      };
+      b.style.opacity='0.65';
+      acts.append(b);
+    });
+
+    body.append(acts);
+  }
+
+  if(opts.store!==false){
+    chat.messages.push({
+      role,
+      text:String(text),
+      at:Date.now()
+    });
+    chat.updatedAt=Date.now();
+    updateChatTitle(chat);
+    saveChats();
+    $('currentTitle').textContent=chat.title;
+  }
+
+  if(role==='ai')lastAssistantMessage=text;
+
+  $('messages').scrollTop=$('messages').scrollHeight;
+  return row;
+}
+
+function renderChat(){
+  const root=$('messages');
+  root.replaceChildren();
+
+  const chat=currentChat();
+  $('welcome').classList.toggle('hidden',!!chat?.messages?.length);
+
+  if(!chat){
+    const c={
+      id:uid(),
+      title:'Nouveau chat',
+      updatedAt:Date.now(),
+      messages:[]
+    };
+    chats.unshift(c);
+    activeId=c.id;
+    saveChats();
+    return renderChat();
+  }
+
+  chat.messages.forEach(m=>{
+    addMessage(m.text,m.role,{
+      store:false,
+      actions:m.role==='ai',
+      at:m.at
+    });
+  });
+
+  $('currentTitle').textContent=chat.title;
+  root.scrollTop=root.scrollHeight;
+}
+
 function renderChat(){const root=$('messages');root.replaceChildren();const chat=currentChat();$('welcome').classList.toggle('hidden',!!chat?.messages?.length);if(!chat){const c={id:uid(),title:'Nouveau chat',updatedAt:Date.now(),messages:[]};chats.unshift(c);activeId=c.id;saveChats();return renderChat()}chat.messages.forEach(m=>addMessage(m.text,m.role,{store:false,actions:m.role==='ai'}));$('currentTitle').textContent=chat.title;root.scrollTop=root.scrollHeight}
 function speak(text) {
   if (
