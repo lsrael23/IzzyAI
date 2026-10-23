@@ -1322,21 +1322,69 @@ function renderMessages() {
   }
 }
 
-    var actions = el("div", "message-actions");
-    actions.appendChild(button("Copier", "", function () { copyText(msg.content); }));
+   
+var actions = el("div", "message-actions");
+
+    actions.appendChild(button("Copier", "", function () {
+      copyText(msg.content);
+    }));
+
     if (isUser) {
-      actions.appendChild(button("Modifier", "", function () { editMessage(index); }));
-    } else {
-      actions.appendChild(button("🔊 Écouter", "", function () {
-        if (!speakText(msg.content)) toast("La synthèse vocale n'est pas disponible sur ce navigateur.");
+      actions.appendChild(button("Modifier", "", function () {
+        editMessage(index);
       }));
+    } else {
+      // Réactions positives et négatives
+      actions.appendChild(button("👍", "", function () {
+        toast("Merci pour ton avis !");
+      }));
+
+      actions.appendChild(button("👎", "", function () {
+        toast("Merci, ton avis est pris en compte.");
+      }));
+
+      // Partager la réponse
+      actions.appendChild(button("Partager", "", async function () {
+        var textToShare = msg.content || "";
+
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: "Réponse de IZZY AI",
+              text: textToShare
+            });
+          } catch (error) {
+            if (error.name !== "AbortError") {
+              toast("Impossible de partager cette réponse.");
+            }
+          }
+        } else {
+          try {
+            await navigator.clipboard.writeText(textToShare);
+            toast("Réponse copiée pour le partage.");
+          } catch (error) {
+            copyText(textToShare);
+            toast("Réponse prête à être copiée.");
+          }
+        }
+      }));
+
+      actions.appendChild(button("🔊 Écouter", "", function () {
+        if (!speakText(msg.content)) {
+          toast("La synthèse vocale n'est pas disponible sur ce navigateur.");
+        }
+      }));
+
       var isLast = index === all.length - 1;
       var prev = all[index - 1];
+
       if (isLast && prev && prev.role === "user" && !prev.image) {
         actions.appendChild(button("↻ Régénérer", "", regenerate));
       }
     }
+
     body.appendChild(actions);
+
     row.appendChild(body);
     return row;
   }
