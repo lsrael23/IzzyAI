@@ -231,7 +231,16 @@ if (!window.supabase) {
 </div>
 </div>
 <div class="chat-area"><div class="messages" id="messages" aria-live="polite"></div><div id="typing" class="typing hidden">IZZY AI réfléchit…</div></div>
-<div class="composer-wrap"><div class="composer"><div class="attach-preview" id="attachPreview"><img id="attachImage" alt="Aperçu de la photo"><span>Image prête à envoyer</span><button id="removeImageBtn" aria-label="Retirer l’image">✕</button></div><div class="compose-input"><textarea id="messageInput" rows="1" maxlength="4000" placeholder="Écris à IZZY AI…" aria-label="Ton message"></textarea><button class="send" id="sendBtn" aria-label="Envoyer">➤</button></div><div class="composer-tools"><button class="tool-btn" id="cameraBtn">📷 Photo</button><button class="tool-btn" id="galleryBtn">🖼️ Image</button><button class="tool-btn" id="micBtn">🎤 Voix</button><button class="tool-btn" id="webBtn" aria-pressed="false">🌐 Recherche web</button><button class="tool-btn" id="voiceBtn">🔊 Voix activée</button><button class="tool-btn" id="stopBtn">⏹ Stop</button></div><input type="file" id="cameraInput" accept="image/*" capture="environment" hidden><input type="file" id="galleryInput" accept="image/*" hidden></div><div class="compose-hint">IZZY AI peut se tromper. Vérifie les informations importantes.</div></div>
+<div class="composer-wrap"><div class="composer"><div class="attach-preview" id="attachPreview"><img id="attachImage" alt="Aperçu de la photo"><span>Image prête à envoyer</span><button id="removeImageBtn" aria-label="Retirer l’image">✕</button></div><div class="compose-input"><textarea id="messageInput" rows="1" maxlength="4000" placeholder="Écris à IZZY AI…" aria-label="Ton message"></textarea><button class="send" id="sendBtn" aria-label="Envoyer">➤</button></div>
+<div class="composer-tools">
+  <button class="tool-btn" id="cameraBtn">Photo</button>
+  <button class="tool-btn" id="galleryBtn">Image</button>
+  <button class="tool-btn" id="micBtn">Voix</button>
+  <button class="tool-btn" id="webBtn" aria-pressed="false">Recherche web</button>
+  <button class="tool-btn" id="voiceBtn">Voix activée</button>
+  <button class="tool-btn" id="stopBtn">Stop</button>
+</div>
+<input type="file" id="cameraInput" accept="image/*" capture="environment" hidden><input type="file" id="galleryInput" accept="image/*" hidden></div><div class="compose-hint">IZZY AI peut se tromper. Vérifie les informations importantes.</div></div>
 </section>
 <section class="panel" id="projectsPanel"><div class="panel-card"><h2>Projets</h2><p>Les projets sont stockés dans ce navigateur sur cet appareil.</p><div class="field"><label for="projectInput">Nouveau projet</label><div class="field-row"><input id="projectInput" type="text" maxlength="100" placeholder="Ex. Développer IZZY AI" class="search-input"><button class="primary" id="addProjectBtn">Ajouter</button></div></div><div id="projectsList" class="list-items"></div></div></section>
 <section class="panel" id="tasksPanel"><div class="panel-card"><h2>Tâches</h2><p>Ajoute des tâches et coche-les quand elles sont terminées.</p><div class="field"><label for="taskInput">Nouvelle tâche</label><div class="field-row"><input id="taskInput" type="text" maxlength="160" placeholder="Ce que tu dois faire…" class="search-input"><button class="primary" id="addTaskBtn">Ajouter</button></div></div><div id="tasksList" class="list-items"></div></div></section>
