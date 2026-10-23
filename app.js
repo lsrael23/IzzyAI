@@ -1498,7 +1498,39 @@
     }
     if (sending) scrollDown();
   }
+function isImageGenerationRequest(text) {
+  return /\b(génère|générer|génération|crée|créer|dessine|dessiner|fabrique|imagine|generate|create|draw|make me an image|make an image|picture of|image de|photo de)\b/i.test(
+    String(text || "")
+  );
+}
 
+async function requestGeneratedImage(prompt, signal) {
+  var res = await apiFetch("/generate-image", {
+    method: "POST",
+    body: { prompt: prompt },
+    timeoutMs: 180000,
+    signal: signal
+  });
+
+  if (!res.ok) {
+    throw httpErrorFrom(res, "/generate-image");
+  }
+
+  var imageData = res.data && res.data.imageData;
+
+  if (
+    typeof imageData !== "string" ||
+    !/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(imageData)
+  ) {
+    throw apiError(
+      "Http",
+      "Le serveur n'a pas renvoyé une image valide. Réessaie.",
+      res.status
+    );
+  }
+
+  return imageData;
+}
   async function submitMessage(textOverride) {
     if (state.sending) return;
     if (!state.user) { showAuthScreen(); return; }
