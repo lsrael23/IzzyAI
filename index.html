@@ -210,7 +210,26 @@ if (!window.supabase) {
 <div class="content">
 <section id="chatPanel" class="panel active">
 <div class="temp-banner hidden" id="tempBanner" role="status"><span>◉ Chat temporaire : cette conversation n’est pas enregistrée dans ton historique et sera effacée quand tu quittes.</span><button id="tempExitBtn" type="button">Quitter</button></div>
-<div class="welcome" id="welcome"><div class="orb"><img src="https://raw.githubusercontent.com/lsrael23/IzzyAI/main/05DA307C-CFC0-4BBE-A61C-1560A7C4F3FA.png" alt="Robot IZZY AI"></div><h2>On parle ?</h2><p>Pose une question, partage une idée ou envoie une photo. On avance ensemble.</p><div class="suggestions"><button class="suggestion" data-prompt="Explique-moi un cours simplement, étape par étape."><b>🎓 M’aider à apprendre</b>Une explication simple, sans grands mots.</button><button class="suggestion" data-prompt="Donne-moi une idée originale et aide-moi à la réaliser."><b>✦ Trouver une idée</b>Un projet concret à développer.</button><button class="suggestion" data-prompt="Fais une recherche web récente sur les nouveautés en intelligence artificielle, avec les liens directs des articles."><b>🌐 Chercher sur le web</b>Des infos récentes avec leurs sources.</button><button class="suggestion" data-prompt="Aide-moi à organiser mes tâches importantes aujourd’hui."><b>✓ Organiser mes tâches</b>Un plan clair et réalisable.</button></div></div>
+<div class="welcome" id="welcome"><div class="orb"><img src="https://raw.githubusercontent.com/lsrael23/IzzyAI/main/05DA307C-CFC0-4BBE-A61C-1560A7C4F3FA.png" alt="Robot IZZY AI"></div><h2>On parle ?</h2><p>Pose une question, partage une idée ou envoie une photo. On avance ensemble.</p><div
+<div class="suggestions">
+  <button class="suggestion" data-prompt="Explique-moi un cours simplement, étape par étape.">
+    <b>M’aider à apprendre</b>
+    Une explication simple, sans grands mots.
+  </button>
+  <button class="suggestion" data-prompt="Donne-moi une idée originale et aide-moi à la réaliser.">
+    <b>Trouver une idée</b>
+    Un projet concret à développer.
+  </button>
+  <button class="suggestion" data-prompt="Fais une recherche web récente sur les nouveautés en intelligence artificielle, avec les liens directs des articles.">
+    <b>Chercher sur le web</b>
+    Des infos récentes avec leurs sources.
+  </button>
+  <button class="suggestion" data-prompt="Aide-moi à organiser mes tâches importantes aujourd’hui.">
+    <b>Organiser mes tâches</b>
+    Un plan clair et réalisable.
+  </button>
+</div>
+</div>
 <div class="chat-area"><div class="messages" id="messages" aria-live="polite"></div><div id="typing" class="typing hidden">IZZY AI réfléchit…</div></div>
 <div class="composer-wrap"><div class="composer"><div class="attach-preview" id="attachPreview"><img id="attachImage" alt="Aperçu de la photo"><span>Image prête à envoyer</span><button id="removeImageBtn" aria-label="Retirer l’image">✕</button></div><div class="compose-input"><textarea id="messageInput" rows="1" maxlength="4000" placeholder="Écris à IZZY AI…" aria-label="Ton message"></textarea><button class="send" id="sendBtn" aria-label="Envoyer">➤</button></div><div class="composer-tools"><button class="tool-btn" id="cameraBtn">📷 Photo</button><button class="tool-btn" id="galleryBtn">🖼️ Image</button><button class="tool-btn" id="micBtn">🎤 Voix</button><button class="tool-btn" id="webBtn" aria-pressed="false">🌐 Recherche web</button><button class="tool-btn" id="voiceBtn">🔊 Voix activée</button><button class="tool-btn" id="stopBtn">⏹ Stop</button></div><input type="file" id="cameraInput" accept="image/*" capture="environment" hidden><input type="file" id="galleryInput" accept="image/*" hidden></div><div class="compose-hint">IZZY AI peut se tromper. Vérifie les informations importantes.</div></div>
 </section>
