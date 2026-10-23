@@ -127,10 +127,10 @@ app.get("/health", (req, res) => {
       ADMIN_USER_ID
     ),
     aiConfigured: Boolean(process.env.GROQ_API_KEY),
-    webSearchConfigured: Boolean(process.env.TAVILY_API_KEY)
+    webSearchConfigured: Boolean(process.env.TAVILY_API_KEY),
+    imageGenerationConfigured: Boolean(process.env.OPENAI_API_KEY)
   });
 });
-imageGenerationConfigured: Boolean(process.env.OPENAI_API_KEY),
 // ================================
 // AUTHENTIFICATION SUPABASE
 // ================================
