@@ -166,18 +166,32 @@ if (!window.supabase) {
 <div class="app hidden" id="app">
 <aside class="sidebar" id="sidebar" aria-label="Navigation principale">
 <div class="brand"><img class="logo" src="https://raw.githubusercontent.com/lsrael23/IzzyAI/main/05DA307C-CFC0-4BBE-A61C-1560A7C4F3FA.png" alt="Logo IZZY AI"><div><h1>IZZY AI</h1><p>COMPAGNON INTELLIGENT</p></div></div>
-<button class="new-chat" id="newChatBtn"><span>➕</span> Nouveau chat</button>
+
+<button class="new-chat" id="newChatBtn"><span class="ico">+</span> Nouveau chat</button>
 <button class="nav-btn" id="temporaryChatBtn" type="button" aria-pressed="false"><span class="ico">◉</span> Chat temporaire</button>
-<button class="nav-btn" id="searchChatsBtn"><span class="ico">🔎</span> Rechercher un chat</button>
+<button class="nav-btn" id="searchChatsBtn"><span class="ico">⌕</span> Rechercher un chat</button>
 <div id="historySearchWrap" class="hidden"><input id="historySearch" class="search-input" type="search" placeholder="Rechercher dans l’historique…"></div>
 <div class="nav-label">ESPACE</div>
-<button class="nav-btn" data-panel="projects"><span class="ico">📁</span> Projets</button>
+<button class="nav-btn" data-panel="projects"><span class="ico">▧</span> Projets</button>
 <button class="nav-btn" data-panel="tasks"><span class="ico">✓</span> Tâches</button>
 <button class="nav-btn" data-panel="memories"><span class="ico">✧</span> Ma mémoire</button>
-<button class="nav-btn hidden" id="adminBtn" data-panel="admin"><span class="ico">🛡️</span> Administration</button>
-<div class="nav-label">RÉCENTS</div><div class="history-list" id="historyList"></div>
-<div class="side-bottom"><button class="nav-btn" data-panel="settings"><span class="ico">⚙️</span> Paramètres</button><div class="profile"><div class="profile-orb">I</div><div style="min-width:0"><strong id="profileName">IZZY AI</strong><small id="profileEmail">Compte connecté</small><div id="adminTag" class="admin-tag hidden">ADMINISTRATEUR</div></div></div><button class="nav-btn" id="signOutBtn"><span class="ico">🚪</span> Déconnexion</button></div>
+<button class="nav-btn hidden" id="adminBtn" data-panel="admin"><span class="ico">◇</span> Administration</button>
+<div class="nav-label">RÉCENTS</div>
+<div class="history-list" id="historyList"></div>
+<div class="side-bottom">
+  <button class="nav-btn" data-panel="settings"><span class="ico">⚙</span> Paramètres</button>
+  <div class="profile">
+    <div class="profile-orb">I</div>
+    <div style="min-width:0">
+      <strong id="profileName">IZZY AI</strong>
+      <small id="profileEmail">Compte connecté</small>
+      <div id="adminTag" class="admin-tag hidden">ADMINISTRATEUR</div>
+    </div>
+  </div>
+  <button class="nav-btn" id="signOutBtn"><span class="ico">↪</span> Déconnexion</button>
+</div>
 </aside>
+
 <div class="overlay" id="overlay"></div>
 <main class="main">
 <header class="topbar"><div class="top-left"><button class="mobile-menu" id="menuBtn" aria-label="Ouvrir le menu">☰</button><div class="current-title" id="currentTitle">Nouveau chat</div></div><div class="top-right"><button class="tool-btn desktop-only" id="topNewChat">➕ Nouveau</button><button class="tool-btn desktop-only" id="clearChatBtn">Effacer</button><div class="status" id="status">● Connexion…</div></div></header>
