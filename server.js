@@ -130,7 +130,7 @@ app.get("/health", (req, res) => {
     webSearchConfigured: Boolean(process.env.TAVILY_API_KEY)
   });
 });
-
+imageGenerationConfigured: Boolean(process.env.OPENAI_API_KEY),
 // ================================
 // AUTHENTIFICATION SUPABASE
 // ================================
@@ -1636,7 +1636,88 @@ app.post("/vision", requireAuth, async (req, res) => {
     return handleAIError(res, error, "/vision");
   }
 });
+// ================================
+// GÉNÉRATION D'IMAGES OPENAI
+// ================================
 
+app.post("/generate-image", requireAuth, async (req, res) => {
+  if (!checkRateLimit(req, res)) return;
+
+  const prompt =
+    typeof req.body?.prompt === "string"
+      ? req.body.prompt.trim()
+      : "";
+
+  if (!prompt || prompt.length > 1000) {
+    return res.status(400).json({
+      error: "Décris l'image à créer (1 000 caractères maximum)."
+    });
+  }
+
+  if (!process.env.OPENAI_API_KEY) {
+    return res.status(503).json({
+      error: "La clé OPENAI_API_KEY n'est pas configurée sur Render."
+    });
+  }
+
+  try {
+    const imageClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      timeout: 120000,
+      maxRetries: 1
+    });
+
+    const result = await imageClient.images.generate({
+      model: "gpt-image-1",
+      prompt,
+      size: "1024x1024"
+    });
+
+    const imageBase64 = result?.data?.[0]?.b64_json;
+
+    if (!imageBase64) {
+      return res.status(502).json({
+        error: "OpenAI n'a pas renvoyé d'image exploitable."
+      });
+    }
+
+    return res.json({
+      imageData: `data:image/png;base64,${imageBase64}`,
+      revisedPrompt: result.data[0].revised_prompt || null
+    });
+  } catch (error) {
+    console.error("Erreur de génération d'image :", {
+      status: error?.status,
+      code: error?.code
+    });
+
+    if (error?.status === 401) {
+      return res.status(502).json({
+        error: "La clé OpenAI est invalide. Vérifie OPENAI_API_KEY sur Render."
+      });
+    }
+
+    if (error?.status === 429) {
+      return res.status(429).json({
+        error: "Limite ou crédits API OpenAI atteints. Vérifie la facturation API."
+      });
+    }
+
+    if (
+      error?.name === "AbortError" ||
+      error?.name === "TimeoutError" ||
+      error?.code === "ETIMEDOUT"
+    ) {
+      return res.status(504).json({
+        error: "La génération prend trop de temps. Réessaie."
+      });
+    }
+
+    return res.status(502).json({
+      error: "Impossible de générer l'image pour le moment."
+    });
+  }
+});
 // ================================
 // FIN D'UNE CONVERSATION
 // ================================
