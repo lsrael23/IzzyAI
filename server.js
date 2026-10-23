@@ -1486,32 +1486,20 @@ app.post("/chat", requireAuth, async (req, res) => {
       ? appendSources(reply, search)
       : reply.trim();
 
-    saveHistory(
-      req.user.id,
-      conversationId,
-      [
-        ...history,
-        { role: "user", content: message.trim() },
-        { role: "assistant", content: finalReply }
-      ],
-      temporary
-    );
+  
+if (!temporary) {
+  saveHistory(
+    req.user.id,
+    conversationId,
+    [
+      ...history,
+      { role: "user", content: message.trim() },
+      { role: "assistant", content: finalReply }
+    ],
+    false
+  );
+}
 
-    return res.json({
-      reply: finalReply,
-      conversationId
-    });
-  } catch (error) {
-    return handleAIError(res, error, "/chat");
-  }
-});
-
-// ================================
-// ANALYSE D'IMAGES
-// ================================
-
-app.post("/vision", requireAuth, async (req, res) => {
-  if (!checkRateLimit(req, res)) return;
 
   const message =
     typeof req.body?.message === "string" &&
@@ -1550,13 +1538,20 @@ app.post("/vision", requireAuth, async (req, res) => {
   }
 
   try {
-    await recordModerationIfNeeded(req.user, message);
+   
+if (!temporary) {
+  await recordModerationIfNeeded(req.user, message);
+}
+
 
     const client = getClient();
 
-    const history =
-      sanitizeClientHistory(req.body?.history) ??
-      getHistory(req.user.id, conversationId);
+    
+const clientHistory = sanitizeClientHistory(req.body?.history);
+
+const history = temporary
+  ? (clientHistory ?? [])
+  : (clientHistory ?? getHistory(req.user.id, conversationId));
 
     const messages = buildMessages(
       history,
