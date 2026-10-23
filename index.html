@@ -118,7 +118,7 @@ input,textarea,select{color:var(--text)}
 .list-item span{flex:1;font-size:13px;overflow-wrap:anywhere}
 .list-item button{padding:5px 8px;font-size:11px}
 .small-note{font-size:11px;color:var(--muted);line-height:1.55}
-.primary{background:#262013;border-color:#685326;color:var(--gold2)}      
+.primary{background:#262013;border-color:#685326;color:var(--gold2)}
 .danger{color:#ffb3a8}
 .footer{text-align:center;font-size:10px;color:#6f695c;padding:12px 0 0}
 .admin-tag{font-size:10px;color:var(--gold2);border:1px solid #685326;padding:4px 7px;border-radius:999px}
@@ -132,6 +132,15 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .auth-card button{-webkit-tap-highlight-color:transparent}
 @media(max-width:760px){.auth-card{padding:22px 19px}.auth-card label{font-size:13px}.auth-card input{font-size:16px}.auth-card button{font-size:15px}.nav-btn,.tool-btn,.suggestion{min-height:44px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+/* Heure des messages et boutons lisibles dans la bulle dorée */
+.message-timestamp{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.2}
+.message-row.user .message-timestamp{color:#4b3a12;text-align:right}
+.message-row.user .message-actions{justify-content:flex-end;opacity:1}
+.message-row.user .message-actions button{color:#2a210c;border-color:#8a6d27;background:#0000001a}
+/* Chat temporaire */
+.temp-banner{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px;padding:10px 12px;border:1px dashed #8e702e;border-radius:14px;background:#17140c;color:var(--gold2);font-size:12px;line-height:1.5}
+.temp-banner button{flex:0 0 auto;padding:6px 10px;font-size:11px;min-height:36px}
+body.temp-mode .composer{border-color:#8e702e}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -153,9 +162,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 <aside class="sidebar" id="sidebar" aria-label="Navigation principale">
 <div class="brand"><img class="logo" src="https://raw.githubusercontent.com/lsrael23/IzzyAI/main/05DA307C-CFC0-4BBE-A61C-1560A7C4F3FA.png" alt="Logo IZZY AI"><div><h1>IZZY AI</h1><p>COMPAGNON INTELLIGENT</p></div></div>
 <button class="new-chat" id="newChatBtn"><span>➕</span> Nouveau chat</button>
-  <button class="nav-btn" id="temporaryChatBtn" type="button">
-  <span class="ico">◉</span> Chat temporaire
-</button>
+<button class="nav-btn" id="temporaryChatBtn" type="button" aria-pressed="false"><span class="ico">◉</span> Chat temporaire</button>
 <button class="nav-btn" id="searchChatsBtn"><span class="ico">🔎</span> Rechercher un chat</button>
 <div id="historySearchWrap" class="hidden"><input id="historySearch" class="search-input" type="search" placeholder="Rechercher dans l’historique…"></div>
 <div class="nav-label">ESPACE</div>
@@ -171,6 +178,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 <header class="topbar"><div class="top-left"><button class="mobile-menu" id="menuBtn" aria-label="Ouvrir le menu">☰</button><div class="current-title" id="currentTitle">Nouveau chat</div></div><div class="top-right"><button class="tool-btn desktop-only" id="topNewChat">➕ Nouveau</button><button class="tool-btn desktop-only" id="clearChatBtn">Effacer</button><div class="status" id="status">● Connexion…</div></div></header>
 <div class="content">
 <section id="chatPanel" class="panel active">
+<div class="temp-banner hidden" id="tempBanner" role="status"><span>◉ Chat temporaire : cette conversation n’est pas enregistrée dans ton historique et sera effacée quand tu quittes.</span><button id="tempExitBtn" type="button">Quitter</button></div>
 <div class="welcome" id="welcome"><div class="orb"><img src="https://raw.githubusercontent.com/lsrael23/IzzyAI/main/05DA307C-CFC0-4BBE-A61C-1560A7C4F3FA.png" alt="Robot IZZY AI"></div><h2>On parle ?</h2><p>Pose une question, partage une idée ou envoie une photo. On avance ensemble.</p><div class="suggestions"><button class="suggestion" data-prompt="Explique-moi un cours simplement, étape par étape."><b>🎓 M’aider à apprendre</b>Une explication simple, sans grands mots.</button><button class="suggestion" data-prompt="Donne-moi une idée originale et aide-moi à la réaliser."><b>✦ Trouver une idée</b>Un projet concret à développer.</button><button class="suggestion" data-prompt="Fais une recherche web récente sur les nouveautés en intelligence artificielle, avec les liens directs des articles."><b>🌐 Chercher sur le web</b>Des infos récentes avec leurs sources.</button><button class="suggestion" data-prompt="Aide-moi à organiser mes tâches importantes aujourd’hui."><b>✓ Organiser mes tâches</b>Un plan clair et réalisable.</button></div></div>
 <div class="chat-area"><div class="messages" id="messages" aria-live="polite"></div><div id="typing" class="typing hidden">IZZY AI réfléchit…</div></div>
 <div class="composer-wrap"><div class="composer"><div class="attach-preview" id="attachPreview"><img id="attachImage" alt="Aperçu de la photo"><span>Image prête à envoyer</span><button id="removeImageBtn" aria-label="Retirer l’image">✕</button></div><div class="compose-input"><textarea id="messageInput" rows="1" maxlength="4000" placeholder="Écris à IZZY AI…" aria-label="Ton message"></textarea><button class="send" id="sendBtn" aria-label="Envoyer">➤</button></div><div class="composer-tools"><button class="tool-btn" id="cameraBtn">📷 Photo</button><button class="tool-btn" id="galleryBtn">🖼️ Image</button><button class="tool-btn" id="micBtn">🎤 Voix</button><button class="tool-btn" id="webBtn" aria-pressed="false">🌐 Recherche web</button><button class="tool-btn" id="voiceBtn">🔊 Voix activée</button><button class="tool-btn" id="stopBtn">⏹ Stop</button></div><input type="file" id="cameraInput" accept="image/*" capture="environment" hidden><input type="file" id="galleryInput" accept="image/*" hidden></div><div class="compose-hint">IZZY AI peut se tromper. Vérifie les informations importantes.</div></div>
@@ -185,6 +193,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 </main>
 </div>
 <div id="toast" class="toast hidden" role="status" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:100;background:#272316;border:1px solid #6a5429;color:#f6e5b4;border-radius:999px;padding:10px 15px;font-size:12px;max-width:90vw;text-align:center"></div>
-<script src="app.js?v=1" onerror="document.getElementById('authError').textContent='Fichier app.js introuvable. Verifie son nom et sa place dans GitHub.'"></script>
+<script src="app.js?v=2" onerror="document.getElementById('authError').textContent='Fichier app.js introuvable. Verifie son nom et sa place dans GitHub.'"></script>
 </body>
 </html>
