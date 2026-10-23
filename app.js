@@ -1321,7 +1321,7 @@ function renderMessages() {
     body.appendChild(generatedImg);
   }
 }
-body.appendChild(el("div", "message-timestamp", fmtTime(msg.ts)));
+
     var actions = el("div", "message-actions");
     actions.appendChild(button("Copier", "", function () { copyText(msg.content); }));
     if (isUser) {
