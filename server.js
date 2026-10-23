@@ -1422,6 +1422,8 @@ function handleAIError(res, error, action) {
 // ================================
 
 app.post("/chat", requireAuth, async (req, res) => {
+  res.set("Cache-Control", "no-store");
+
   if (!checkRateLimit(req, res)) return;
 
   const {
@@ -1446,13 +1448,18 @@ app.post("/chat", requireAuth, async (req, res) => {
   }
 
   try {
-    await recordModerationIfNeeded(req.user, message);
+    // Les conversations temporaires ne créent pas d'alertes.
+    if (!temporary) {
+      await recordModerationIfNeeded(req.user, message);
+    }
 
     const client = getClient();
 
-    const history =
-      sanitizeClientHistory(req.body?.history) ??
-      getHistory(req.user.id, conversationId);
+    const clientHistory = sanitizeClientHistory(req.body?.history);
+
+    const history = temporary
+      ? (clientHistory ?? [])
+      : (clientHistory ?? getHistory(req.user.id, conversationId));
 
     const shouldSearch =
       forceWebSearch === true ||
@@ -1486,20 +1493,37 @@ app.post("/chat", requireAuth, async (req, res) => {
       ? appendSources(reply, search)
       : reply.trim();
 
-  
-if (!temporary) {
-  saveHistory(
-    req.user.id,
-    conversationId,
-    [
-      ...history,
-      { role: "user", content: message.trim() },
-      { role: "assistant", content: finalReply }
-    ],
-    false
-  );
-}
+    // Seules les conversations normales sont sauvegardées.
+    if (!temporary) {
+      saveHistory(
+        req.user.id,
+        conversationId,
+        [
+          ...history,
+          { role: "user", content: message.trim() },
+          { role: "assistant", content: finalReply }
+        ],
+        false
+      );
+    }
 
+    return res.json({
+      reply: finalReply,
+      conversationId
+    });
+  } catch (error) {
+    return handleAIError(res, error, "/chat");
+  }
+});
+
+// ================================
+// ANALYSE D'IMAGE
+// ================================
+
+app.post("/vision", requireAuth, async (req, res) => {
+  res.set("Cache-Control", "no-store");
+
+  if (!checkRateLimit(req, res)) return;
 
   const message =
     typeof req.body?.message === "string" &&
@@ -1538,20 +1562,18 @@ if (!temporary) {
   }
 
   try {
-   
-if (!temporary) {
-  await recordModerationIfNeeded(req.user, message);
-}
-
+    // Aucune alerte pour les conversations temporaires.
+    if (!temporary) {
+      await recordModerationIfNeeded(req.user, message);
+    }
 
     const client = getClient();
 
-    
-const clientHistory = sanitizeClientHistory(req.body?.history);
+    const clientHistory = sanitizeClientHistory(req.body?.history);
 
-const history = temporary
-  ? (clientHistory ?? [])
-  : (clientHistory ?? getHistory(req.user.id, conversationId));
+    const history = temporary
+      ? (clientHistory ?? [])
+      : (clientHistory ?? getHistory(req.user.id, conversationId));
 
     const messages = buildMessages(
       history,
@@ -1586,22 +1608,25 @@ const history = temporary
       });
     }
 
-    saveHistory(
-      req.user.id,
-      conversationId,
-      [
-        ...history,
-        {
-          role: "user",
-          content: `[Photo analysée] ${message}`
-        },
-        {
-          role: "assistant",
-          content: reply.trim()
-        }
-      ],
-      temporary
-    );
+    // Ne jamais sauvegarder une conversation temporaire.
+    if (!temporary) {
+      saveHistory(
+        req.user.id,
+        conversationId,
+        [
+          ...history,
+          {
+            role: "user",
+            content: `[Photo analysée] ${message}`
+          },
+          {
+            role: "assistant",
+            content: reply.trim()
+          }
+        ],
+        false
+      );
+    }
 
     return res.json({
       reply: reply.trim(),
@@ -1613,7 +1638,7 @@ const history = temporary
 });
 
 // ================================
-// FIN D'UNE CONVERSATION (EFFACEMENT DU CONTEXTE SERVEUR)
+// FIN D'UNE CONVERSATION
 // ================================
 
 app.post("/chat/end", requireAuth, (req, res) => {
@@ -1636,7 +1661,7 @@ app.post("/chat/end", requireAuth, (req, res) => {
 });
 
 // ================================
-// ROUTES INCONNUES ET ERREURS (RÉPONSES JSON)
+// ROUTES INCONNUES ET ERREURS
 // ================================
 
 app.use((req, res) => {
