@@ -1272,11 +1272,25 @@
     var body = el("div", "message-body");
     if (isUser) {
       body.textContent = (msg.image ? "📷 Photo envoyée" + (msg.content ? "\n" : "") : "") + msg.content;
-    } else {
-      renderRich(body, msg.content);
-    }
-    body.appendChild(el("div", "message-timestamp", fmtTime(msg.ts)));
+   } else {
+  renderRich(body, msg.content);
 
+  if (msg.generatedImage) {
+    var generatedImg = document.createElement("img");
+    generatedImg.src = msg.generatedImage;
+    generatedImg.alt = "Image générée par IZZY AI";
+    generatedImg.loading = "lazy";
+    generatedImg.style.display = "block";
+    generatedImg.style.width = "100%";
+    generatedImg.style.maxWidth = "512px";
+    generatedImg.style.height = "auto";
+    generatedImg.style.borderRadius = "14px";
+    generatedImg.style.marginTop = "12px";
+    generatedImg.style.border = "1px solid rgba(212,175,55,0.35)";
+    body.appendChild(generatedImg);
+  }
+}
+body.appendChild(el("div", "message-timestamp", fmtTime(msg.ts)));
     var actions = el("div", "message-actions");
     actions.appendChild(button("Copier", "", function () { copyText(msg.content); }));
     if (isUser) {
@@ -1577,13 +1591,37 @@ async function requestGeneratedImage(prompt, signal) {
     }, 12000);
 
     try {
-      var reply = image
-        ? await requestVision(chat, userMsg, history, image, controller.signal)
-        : await requestChat(chat, userMsg, history, controller.signal);
+     var wantsGeneratedImage =
+  !image && isImageGenerationRequest(userMsg.content);
+
+var generatedImage = null;
+var reply;
+
+if (image) {
+  reply = await requestVision(
+    chat, userMsg, history, image, controller.signal
+  );
+} else if (wantsGeneratedImage) {
+  generatedImage = await requestGeneratedImage(
+    userMsg.content, controller.signal
+  );
+  reply = "Voilà l’image que j’ai générée pour toi.";
+} else {
+  reply = await requestChat(
+    chat, userMsg, history, controller.signal
+  );
+}
 
       if (!state.user || state.user.id !== ownerId) return; // déconnexion/changement de compte entre-temps
 
-      chat.messages.push({ id: uid(), role: "assistant", content: reply, ts: Date.now(), image: false });
+     chat.messages.push({
+  id: uid(),
+  role: "assistant",
+  content: reply,
+  ts: Date.now(),
+  image: false,
+  generatedImage: generatedImage
+});
       chat.updatedAt = Date.now();
       state.pendingError = null;
       if (!state.temp) saveChats();
