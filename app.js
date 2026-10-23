@@ -1252,17 +1252,48 @@
     } catch (e) { /* ignoré */ }
   }
 
-  function renderMessages() {
+
+function renderMessages() {
     var box = els.messages;
     if (!box) return;
     clearNode(box);
+
     var chat = currentChat();
     var msgs = chat ? chat.messages : [];
-    msgs.forEach(function (m, i) { box.appendChild(buildRow(m, i, msgs)); });
+
+    if (chat && msgs.length > 0) {
+      var dateHeader = document.createElement("div");
+      dateHeader.className = "conversation-date";
+
+      var dateValue = chat.createdAt || (msgs[0] && msgs[0].ts) || Date.now();
+      var date = new Date(dateValue);
+
+      dateHeader.textContent = date.toLocaleDateString("fr-FR", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      });
+
+      box.appendChild(dateHeader);
+    }
+
+    msgs.forEach(function (m, i) {
+      box.appendChild(buildRow(m, i, msgs));
+    });
+
     if (state.pendingError) box.appendChild(buildErrorRow());
-    if (els.welcome) els.welcome.classList.toggle("hidden", msgs.length > 0 || Boolean(state.pendingError));
+
+    if (els.welcome) {
+      els.welcome.classList.toggle(
+        "hidden",
+        msgs.length > 0 || Boolean(state.pendingError)
+      );
+    }
+
     scrollDown();
   }
+
 
   function buildRow(msg, index, all) {
     var isUser = msg.role === "user";
