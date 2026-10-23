@@ -194,7 +194,19 @@ if (!window.supabase) {
 
 <div class="overlay" id="overlay"></div>
 <main class="main">
-<header class="topbar"><div class="top-left"><button class="mobile-menu" id="menuBtn" aria-label="Ouvrir le menu">☰</button><div class="current-title" id="currentTitle">Nouveau chat</div></div><div class="top-right"><button class="tool-btn desktop-only" id="topNewChat">➕ Nouveau</button><button class="tool-btn desktop-only" id="clearChatBtn">Effacer</button><div class="status" id="status">● Connexion…</div></div></header>
+
+<header class="topbar">
+  <div class="top-left">
+    <button class="mobile-menu" id="menuBtn" aria-label="Ouvrir le menu">☰</button>
+    <div class="current-title" id="currentTitle">Nouveau chat</div>
+  </div>
+  <div class="top-right">
+    <button class="tool-btn desktop-only" id="topNewChat">+ Nouveau</button>
+    <button class="tool-btn desktop-only" id="clearChatBtn">Effacer</button>
+    <div class="status" id="status">● Connexion…</div>
+  </div>
+</header>
+
 <div class="content">
 <section id="chatPanel" class="panel active">
 <div class="temp-banner hidden" id="tempBanner" role="status"><span>◉ Chat temporaire : cette conversation n’est pas enregistrée dans ton historique et sera effacée quand tu quittes.</span><button id="tempExitBtn" type="button">Quitter</button></div>
